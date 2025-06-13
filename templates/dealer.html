@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dealer Panel</title>
+</head>
+<body style="background-color: white; color: black; padding: 50px;">
+    <h1>Dealer Panel</h1>
+    <table border="1" cellpadding="10" cellspacing="0">
+        <tr>
+            <th>ID</th>
+            <th>Body</th>
+            <th>Engine</th>
+            <th>Drive</th>
+            <th>Colour</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for car in cars %}
+        <tr>
+            <td>{{ car.car_id }}</td>
+            <td>{{ car._body }}</td>
+            <td>{{ car._engine }}</td>
+            <td>{{ car._drive }}</td>
+            <td>{{ car._colour }}</td>
+            <td>{{ car._price }}</td>
+            <td>{{ "Sold" if car._sold == 's' else "Available" }}</td>
+            <td>
+                {% if car._sold == 's' %}
+                    <a href="/reset/{{ car.car_id }}">Mark as Available</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br><br>
+    <a href="/">Exit</a>
+</body>
+</html>
