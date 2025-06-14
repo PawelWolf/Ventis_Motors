@@ -1,6 +1,5 @@
 from models import CarNotAvailableException
 
-# Template Method
 class CarPurchaseTemplate:
     def __init__(self, db):
         self.db = db
@@ -17,7 +16,6 @@ class CarPurchaseTemplate:
     def process_purchase(self, car):
         raise NotImplementedError
 
-# Strategia - oddzielna strategia dla klienta
 class ClientPurchase(CarPurchaseTemplate):
     def process_purchase(self, car):
         if car.sold == 's':
@@ -25,7 +23,6 @@ class ClientPurchase(CarPurchaseTemplate):
         car.sell()
         return car.price
 
-# Command wzorzec
 class Command:
     def execute(self):
         pass
