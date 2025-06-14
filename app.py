@@ -36,5 +36,11 @@ def reset(car_id):
     cmd.execute()
     return redirect(url_for('dealer'))
 
+@app.route("/reset_all", methods=["POST"])
+def reset_all():
+    command = ResetAllCarsCommand(db)
+    command.execute()
+    return redirect(url_for("dealer"))
+
 if __name__ == '__main__':
     app.run(debug=True)
