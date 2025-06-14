@@ -4,7 +4,6 @@ app.py after being started shoud run rest of modules and a major a flask server 
 
 you can put ip into your browser to see the frontend of app.
 
-
 List of requrements:
 Using inheritance
 Using attributes in classes; showing attribute overrides in descendant classes
@@ -19,10 +18,11 @@ Using design pattern: Strategy (strategy)
 Use of design pattern: Command (command)
 Application of design pattern: Template method (template method)
 
-
-Authors: 
+Authors:
 Paweł Wolf
 Kondrad Skrzypek
 Oliwier Pol
 Iwo Czura
 All copyrights reserved
+
+Kutas
