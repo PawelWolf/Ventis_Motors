@@ -24,5 +24,3 @@ Kondrad Skrzypek
 Oliwier Pol
 Iwo Czura
 All copyrights reserved
-
-Kutas
