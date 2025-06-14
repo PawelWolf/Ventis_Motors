@@ -34,3 +34,11 @@ class ResetCarCommand(Command):
 
     def execute(self):
         self.db.update_car_status(self.car_id, None)
+
+class ResetAllCarsCommand(Command):
+    def __init__(self, db):
+        super().__init__()
+        self.db = db
+
+    def execute(self):
+        self.db.reset_all()

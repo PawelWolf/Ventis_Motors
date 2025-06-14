@@ -34,3 +34,9 @@ class Database:
             cursor = conn.cursor()
             cursor.execute("UPDATE cars SET selled=? WHERE id=?", (sold_status, car_id))
             conn.commit()
+    
+    def reset_all(self):
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE cars SET selled = NULL")
+            conn.commit()

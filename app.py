@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from database import Database
-from services import ClientPurchase, ResetCarCommand
+from services import ClientPurchase, ResetCarCommand, ResetAllCarsCommand
 from models import CarNotAvailableException
 
 app = Flask(__name__)
@@ -10,7 +10,6 @@ db = Database()
 def index():
     return render_template("index.html")
 
-# Klient
 @app.route('/client', methods=['GET', 'POST'])
 def client():
     if request.method == 'POST':
@@ -26,7 +25,6 @@ def client():
             return render_template("client_result.html", price=None)
     return render_template("client_form.html")
 
-# Dealer
 @app.route('/dealer')
 def dealer():
     cars = db.get_all_cars()
