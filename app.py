@@ -5,6 +5,7 @@ from models import CarNotAvailableException
 
 app = Flask(__name__)
 db = Database()
+"""Użycie klas"""
 
 @app.route('/')
 def index():
@@ -18,28 +19,36 @@ def client():
         drive = request.form['drive']
         colour = request.form['colour']
         purchase = ClientPurchase(db)
+        """Użycie klas"""
         try:
             price = purchase.purchase(body, engine, drive, colour)
+            """Użycie metod w klasach"""
             return render_template("client_result.html", price=price)
         except CarNotAvailableException:
+            """Użycie dziedziczenia, Utworzenie i użycie swojego wyjątku"""
             return render_template("client_result.html", price=None)
     return render_template("client_form.html")
 
 @app.route('/dealer')
 def dealer():
     cars = db.get_all_cars()
+    """Użycie metod w klasach"""
     return render_template("dealer.html", cars=cars)
 
 @app.route('/reset/<int:car_id>')
 def reset(car_id):
     cmd = ResetCarCommand(db, car_id)
+    """Użycie klas, Zastosowanie wzorca Command"""
     cmd.execute()
+    """Użycie metod w klasach, Polimorfizm"""
     return redirect(url_for('dealer'))
 
 @app.route("/reset_all", methods=["POST"])
 def reset_all():
     command = ResetAllCarsCommand(db)
+    """Użycie klas, Zastosowanie wzorca Command"""
     command.execute()
+    """Użycie metod w klasach, Polimorfizm"""
     return redirect(url_for("dealer"))
 
 if __name__ == '__main__':
