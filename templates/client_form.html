@@ -1,42 +1,99 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Client - Buy Car</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/logo.png" type="image/x-icon">
+    <title>Ventis Motors - Car Configurator</title>
+    <link rel="stylesheet" href="/media/client_style.css">
 </head>
-<body style="background-color: white; color: black; text-align: center; padding-top: 50px;">
-    <h1>Choose your car</h1>
-    <form method="post">
+<body>
+    <div class="main_page">
+        <h1>CHOOSE YOUR FUTURE CAR SPECIFICATION</h1>
+        <form method="post" class="car_config_form">
+            <div class="grid">
+                <div class="spec-group body-group">
+                    <label for="body-select">Body:</label>
+                    <div class="select-wrapper">
+                        <select name="body" id="body-select">
+                            <option value="hatchback">Hatchback</option>
+                            <option value="sedan">Sedan</option>
+                            <option value="combi">Combi</option>
+                            <option value="suv">SUV</option>
+                        </select>
+                    </div>
+                </div>
 
-        <label>Body:</label>
-        <select name="body">
-            <option value="hatchback">Hatchback</option>
-            <option value="sedan">Sedan</option>
-            <option value="combi">Combi</option>
-            <option value="suv">SUV</option>
-        </select><br><br>
+                <div class="spec-group engine-group">
+                    <label for="engine-select">Engine / Fuel:</label>
+                    <div class="select-wrapper">
+                        <select name="engine" id="engine-select">
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                        </select>
+                    </div>
+                </div>
 
-        <label>Engine:</label>
-        <select name="engine">
-            <option value="petrol">Petrol</option>
-            <option value="diesel">Diesel</option>
-        </select><br><br>
+                <div class="spec-group drive-group">
+                    <label for="drive-select">Drive:</label>
+                    <div class="select-wrapper">
+                        <select name="drive" id="drive-select">
+                            <option value="4x2">4x2</option>
+                            <option value="4x4">4x4</option>
+                        </select>
+                    </div>
+                </div>
 
-        <label>Drive:</label>
-        <select name="drive">
-            <option value="4x2">4x2</option>
-            <option value="4x4">4x4</option>
-        </select><br><br>
+                <div class="spec-group colour-group">
+                    <label for="colour-select">Colour:</label>
+                    <div class="select-wrapper">
+                        <select name="colour" id="colour-select">
+                            <option value="white">White</option>
+                            <option value="red">Red</option>
+                            <option value="blue">Blue</option>
+                            <option value="black">Black</option>
+                        </select>
+                    </div>
+                </div>
 
-        <label>Colour:</label>
-        <select name="colour">
-            <option value="white">White</option>
-            <option value="red">Red</option>
-            <option value="blue">Blue</option>
-            <option value="black">Black</option>
-        </select><br><br>
+                <div class="ventis-logo">
+                    <div class="logo-container">
+                        <img src="/media/logo.png" alt="Ventis Motors Logo">
+                    </div>
+                </div>
 
-        <button type="submit" style="padding: 10px 20px;">Buy</button>
-    </form>
+                <div class="buy-back-buttons">
+                    <button type="submit" class="buy-button">Buy</button>
+                    <a href="/" class="back-button">Back</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        const originalTitle = document.title;
+        const scrollText = "🚗💨Dont drive away yet!--- ";
+        let scrollPosition = 0;
+        let animationIntervalId;
+        function scrollTitleStep() {
+            document.title = scrollText.substring(scrollPosition) + scrollText.substring(0, scrollPosition);
+            scrollPosition++;
+            if (scrollPosition >= scrollText.length) {
+                scrollPosition = 0;
+            }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (animationIntervalId) {
+                    clearInterval(animationIntervalId);
+                }
+                scrollPosition = 0;
+                scrollTitleStep();
+                animationIntervalId = setInterval(scrollTitleStep, 350);
+            } else {
+                clearInterval(animationIntervalId);
+                document.title = originalTitle;
+                scrollPosition = 0; 
+            }
+        });
+    </script>
 </body>
-</html>

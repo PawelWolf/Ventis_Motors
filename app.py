@@ -3,7 +3,7 @@ from database import Database
 from services import ClientPurchase, ResetCarCommand, ResetAllCarsCommand
 from models import CarNotAvailableException
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/media', static_folder='media')
 db = Database()
 """Użycie klas"""
 

@@ -1,45 +1,100 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Dealer Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/logo.png" type="image/x-icon">
+    <title>Ventis Motors - Dealer Panel</title>
+    <link rel="stylesheet" href="/media/client_style.css">
+    <style>
+        .car-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+        .car-table th,
+        .car-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .car-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .car-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .car-table tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
-<body style="background-color: white; color: black; padding: 50px;">
-    <h1>Dealer Panel</h1>
-    <table border="1" cellpadding="10" cellspacing="0">
-        <tr>
-            <th>ID</th>
-            <th>Body</th>
-            <th>Engine</th>
-            <th>Drive</th>
-            <th>Colour</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-        {% for car in cars %}
-        <tr>
-            <td>{{ car.car_id }}</td>
-            <td>{{ car._body }}</td>
-            <td>{{ car._engine }}</td>
-            <td>{{ car._drive }}</td>
-            <td>{{ car._colour }}</td>
-            <td>{{ car._price }}</td>
-            <td>{{ "Sold" if car._sold == 's' else "Available" }}</td>
-            <td>
-                {% if car._sold == 's' %}
-                    <a href="/reset/{{ car.car_id }}">Mark as Available</a>
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    <form method="post" action="/reset_all">
-    <button type="submit">Reset All Cars</button>
-    </form>
-    <br><br>
-    <a href="/">Exit</a>
+<body>
+    <div class="main_page">
+        <h1>VENTIS MOTORS - DEALER PANEL</h1>
+
+        <form method="post" action="/reset_all">
+            <button type="submit" class="buy-button">Reset All Cars</button>
+        </form>
+
+        <table class="car-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Body</th>
+                    <th>Engine</th>
+                    <th>Drive</th>
+                    <th>Colour</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for car in cars %}
+                <tr>
+                    <td>{{ car.car_id }}</td>
+                    <td>{{ car._body }}</td>
+                    <td>{{ car._engine }}</td>
+                    <td>{{ car._drive }}</td>
+                    <td>{{ car._colour }}</td>
+                    <td>{{ car._price }}</td>
+                    <td>{{ "Sold" if car._sold == 's' else "Available" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="buy-back-buttons">
+            <a href="/" class="back-button">Back</a>
+        </div>
+    </div>
+    <script>
+        const originalTitle = document.title;
+        const scrollText = "🚗💨Dealer On Duty!--- ";
+        let scrollPosition = 0;
+        let animationIntervalId;
+        function scrollTitleStep() {
+            document.title = scrollText.substring(scrollPosition) + scrollText.substring(0, scrollPosition);
+            scrollPosition++;
+            if (scrollPosition >= scrollText.length) {
+                scrollPosition = 0;
+            }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (animationIntervalId) {
+                    clearInterval(animationIntervalId);
+                }
+                scrollPosition = 0;
+                scrollTitleStep();
+                animationIntervalId = setInterval(scrollTitleStep, 350);
+            } else {
+                clearInterval(animationIntervalId);
+                document.title = originalTitle;
+                scrollPosition = 0; 
+            }
+        });
+    </script>
 </body>
 </html>

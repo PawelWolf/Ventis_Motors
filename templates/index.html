@@ -1,16 +1,62 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Car Ordering System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/logo.png" type="image/x-icon">
+    <title>Ventis Motors</title>
+    <link rel="stylesheet" href="/media/style.css">
 </head>
-<body style="background-color: white; color: black; text-align: center; padding-top: 100px;">
-    <h1>Welcome to Car Ordering System</h1>
-    <form action="/client">
-        <button type="submit" style="padding: 20px; font-size: 20px;">Client</button>
-    </form>
-    <form action="/dealer">
-        <button type="submit" style="padding: 20px; font-size: 20px;">Dealer</button>
-    </form>
+<body>
+    <div class="page-container">
+        <header class="app-header">
+            <p class="subtitle">APPLICATION CAR DEALERSHIP</p>
+            <h1 class="main-brand-title">VENTIS MOTORS</h1>
+        </header>
+        <main class="content-selector">
+            <form action="/client" method="get" class="selection-card client-card">
+                <button type="submit">
+                    <img src="/media/client.jpg" alt="Client Icon" class="card-icon">
+                    <span class="button-text">Client</span>
+                </button>
+            </form>
+            <div class="Logo">
+                <img src="/media/logo.png" alt="Ventis Motors Logo">
+            </div>
+            <form action="/dealer" method="get" class="selection-card dealer-card">
+                <button type="submit">
+                    <img src="/media/dealer.jpg" alt="Dealer Icon" class="card-icon">
+                    <span class="button-text">Dealer</span>
+                </button>
+            </form>
+        </main>
+    </div>
+    <script>
+        const originalTitle = document.title;
+        const scrollText = "🚗💨Dont drive away yet!--- ";
+        let scrollPosition = 0;
+        let animationIntervalId;
+        function scrollTitleStep() {
+            document.title = scrollText.substring(scrollPosition) + scrollText.substring(0, scrollPosition);
+            scrollPosition++;
+            if (scrollPosition >= scrollText.length) {
+                scrollPosition = 0;
+            }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (animationIntervalId) {
+                    clearInterval(animationIntervalId);
+                }
+                scrollPosition = 0;
+                scrollTitleStep();
+                animationIntervalId = setInterval(scrollTitleStep, 350);
+            } else {
+                clearInterval(animationIntervalId);
+                document.title = originalTitle;
+                scrollPosition = 0; 
+            }
+        });
+    </script>
 </body>
 </html>
