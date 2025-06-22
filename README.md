@@ -17,10 +17,11 @@ Creating and using its own exception (own class inheriting from built-in Excepti
 Using design pattern: Strategy (strategy)
 Use of design pattern: Command (command)
 Application of design pattern: Template method (template method)
+In Html Files JavaScript was also used for "Scroling" Effect.
 
 Authors:
 Paweł Wolf
-Kondrad Skrzypek
+Konrad Skrzypek
 Oliwier Pol
 Iwo Czura
 All copyrights reserved
