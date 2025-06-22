@@ -1,17 +1,33 @@
 <!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Purchase result</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/logo.png" type="image/x-icon">
+    <title>Ventis Motors - Purchase Result</title>
+    <link rel="stylesheet" href="/media/client_style.css">
 </head>
-<body style="background-color: white; color: black; text-align: center; padding-top: 100px;">
-    {% if price %}
-        <h1>Congratulations!</h1>
-        <p>You bought the car for {{ price }} PLN</p>
-    {% else %}
-        <h1>Sorry!</h1>
-        <p>Car is not available</p>
-    {% endif %}
-    <a href="/">Back to Home</a>
+<body>
+    <div class="main_page">
+        <div class="grid">
+            <div class="spec-group", style= "align-items: center;">
+                {% if price %}
+                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Congratulations!</h1>
+                    <p style="font-size: 1.25rem; color: #333;">You bought the car for {{ price }} PLN</p>
+                {% else %}
+                    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Sorry!</h1>
+                    <p style="font-size: 1.25rem; color: #333;">Car is not available</p>
+                {% endif %}
+            </div>
+            <div class="ventis-logo">
+                <div class="logo-container">
+                    <img src="/media/logo.png" alt="Ventis Motors Logo">
+                </div>
+            </div>
+            <div class="buy-back-buttons">
+                <a href="/" class="back-button">Back to Home</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
