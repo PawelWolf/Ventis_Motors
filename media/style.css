@@ -36,7 +36,7 @@ h1 {
 .selection-card:hover {
     cursor: pointer;
     border-color: #0B1215;
-    transform: translateY(-5px);  /* Efekt ruszania się po najechaniu*/
+    transform: translateY(-5px);
     box-shadow: 0 25px 25px rgba(0, 0, 0, 0.1);
 }
 form.selection-card button {
