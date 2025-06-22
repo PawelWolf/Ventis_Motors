@@ -23,10 +23,11 @@ def client():
         try:
             price = purchase.purchase(body, engine, drive, colour)
             """Użycie metod w klasach"""
-            return render_template("client_result.html", price=price)
+            car_image = f"{body.lower()}_{colour.lower()}.png"
+            return render_template("client_result.html", price=price, car_image=car_image)
         except CarNotAvailableException:
             """Użycie dziedziczenia, Utworzenie i użycie swojego wyjątku"""
-            return render_template("client_result.html", price=None)
+            return render_template("client_result.html", price=None, car_image=None)
     return render_template("client_form.html")
 
 @app.route('/dealer')
