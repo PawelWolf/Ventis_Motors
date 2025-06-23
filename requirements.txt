@@ -4,5 +4,6 @@ Werkzeug==2.3.7
 itsdangerous==2.1.2
 click==8.1.7
 markupsafe==2.1.5
+gunicorn
 
 # SQLite3 jest zawarty w pythonie 3.11
