@@ -23,5 +23,5 @@ Authors:
 Paweł Wolf
 Konrad Skrzypek
 Oliwier Pol
-Iwo Czura
+Ivo Czura
 All copyrights reserved
