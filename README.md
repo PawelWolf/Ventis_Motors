@@ -19,6 +19,9 @@ Use of design pattern: Command (command)
 Application of design pattern: Template method (template method)
 In Html Files JavaScript was also used for "Scroling" Effect.
 
+Running app on cloud:
+http://ventis-motors-app.azurewebsites.net/
+
 Authors:
 Paweł Wolf
 Konrad Skrzypek
