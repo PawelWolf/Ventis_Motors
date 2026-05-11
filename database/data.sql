@@ -19,8 +19,10 @@ INSERT INTO Statuses (StatusName) VALUES ('Available'), ('Sold'), ('Reserved');
 
 -- Pracownicy
 INSERT INTO Employees (FirstName, LastName, Position) VALUES 
-('Paweł', 'Wolf', 'CEO'),
-('Konrad', 'Skrzypek', 'Sales Manager');
+('Paweł', 'Wolf', 'Manager'),
+('Konrad', 'Skrzypek', 'Sales Manager'),
+('Oliwier', 'Pol', 'Sales specialist'),
+('Ivo', 'Czura', 'Sales specialist');
 
 -- Przykładowe samochody
 -- Przykład: CarID 1 to sedan_blue.jpg
