@@ -1,102 +1,50 @@
-import sqlite3
-from models import CarFactory
+from flask_sqlalchemy import SQLAlchemy
+import os
 
+db = SQLAlchemy()
 
-class Database:
+class Series(db.Model):
+    __tablename__ = 'Series'
+    SeriesID = db.Column(db.Integer, primary_key=True)
+    SeriesName = db.Column(db.String(50), nullable=False)
 
-    def __init__(self, db_path='cars.db'):
-        """
-        Inicjalizuje obiekt Database.
+class BodyType(db.Model):
+    __tablename__ = 'BodyTypes'
+    BodyTypeID = db.Column(db.Integer, primary_key=True)
+    TypeName = db.Column(db.String(30), nullable=False)
 
-        Args:
-            db_path (str, optional): Ścieżka do pliku bazy danych.
-                                   Domyślnie 'cars.db'.
-        """
-        self.db_path = db_path
+class Status(db.Model):
+    __tablename__ = 'Statuses'
+    StatusID = db.Column(db.Integer, primary_key=True)
+    StatusName = db.Column(db.String(30), nullable=False)
 
-    def get_connection(self):
-        """
-        Tworzy i zwraca połączenie z bazą danych SQLite.
+class Engine(db.Model):
+    __tablename__ = 'Engines'
+    EngineID = db.Column(db.Integer, primary_key=True)
+    Capacity = db.Column(db.Float)
+    FuelType = db.Column(db.String(20))
+    Horsepower = db.Column(db.Integer)
 
-        Returns:
-            sqlite3.Connection: Obiekt połączenia z bazą danych
+class Car(db.Model):
+    __tablename__ = 'Cars'
+    CarID = db.Column(db.Integer, primary_key=True)
+    SeriesID = db.Column(db.Integer, db.ForeignKey('Series.SeriesID'))
+    BodyTypeID = db.Column(db.Integer, db.ForeignKey('BodyTypes.BodyTypeID'))
+    EngineID = db.Column(db.Integer, db.ForeignKey('Engines.EngineID'))
+    StatusID = db.Column(db.Integer, db.ForeignKey('Statuses.StatusID'))
+    Colour = db.Column(db.String(30), nullable=False)
+    Price = db.Column(db.Numeric(18, 2), nullable=False)
+    ProductionYear = db.Column(db.Integer)
 
-        Raises:
-            sqlite3.Error: Gdy nie można nawiązać połączenia z bazą danych
-        """
-        return sqlite3.connect(self.db_path)
+    # Relacje ułatwiające dostęp do danych
+    body_rel = db.relationship('BodyType', backref='cars')
+    status_rel = db.relationship('Status', backref='cars')
 
-    def get_all_cars(self):
-        """
-        Pobiera wszystkie samochody z bazy danych.
-
-        Returns:
-            list: Lista obiektów Car utworzonych z rekordów bazy danych
-
-        Raises:
-            sqlite3.Error: Gdy wystąpi błąd podczas wykonywania zapytania SQL
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT id, body, engine, drive, colour, price, selled FROM cars")
-            rows = cursor.fetchall()
-            return [CarFactory.create_from_row(row) for row in rows]
-
-    def find_car(self, body, engine, drive, colour):
-        """
-        Wyszukuje samochód według podanych parametrów.
-
-        Args:
-            body (str): Typ nadwozia samochodu
-            engine (str): Typ silnika
-            drive (str): Typ napędu
-            colour (str): Kolor samochodu
-
-        Returns:
-            Car or None: Obiekt Car jeśli znaleziono, None w przeciwnym razie
-
-        Raises:
-            sqlite3.Error: Gdy wystąpi błąd podczas wykonywania zapytania SQL
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT id, body, engine, drive, colour, price, selled 
-                FROM cars 
-                WHERE body=? AND engine=? AND drive=? AND colour=?""",
-                           (body, engine, drive, colour)
-                           )
-            row = cursor.fetchone()
-            if row:
-                return CarFactory.create_from_row(row)
-            return None
-
-    def update_car_status(self, car_id, sold_status):
-        """
-        Aktualizuje status sprzedaży samochodu.
-
-        Args:
-            car_id (int): ID samochodu w bazie danych
-            sold_status (bool): Nowy status sprzedaży (True = sprzedany)
-
-        Raises:
-            sqlite3.Error: Gdy wystąpi błąd podczas aktualizacji
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("UPDATE cars SET selled=? WHERE id=?", (sold_status, car_id))
-            conn.commit()
-
-    def reset_all(self):
-        """
-        Resetuje statusy sprzedaży wszystkich samochodów na NULL.
-
-        Ustawia pole 'selled' na NULL dla wszystkich rekordów w tabeli cars.
-
-        Raises:
-            sqlite3.Error: Gdy wystąpi błąd podczas resetowania
-        """
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("UPDATE cars SET selled = NULL")
-            conn.commit()
+class Sale(db.Model):
+    __tablename__ = 'Sales'
+    SaleID = db.Column(db.Integer, primary_key=True)
+    CarID = db.Column(db.Integer, db.ForeignKey('Cars.CarID'))
+    CustomerID = db.Column(db.Integer, db.ForeignKey('Customers.CustomerID'))
+    EmployeeID = db.Column(db.Integer, db.ForeignKey('Employees.EmployeeID'))
+    SaleDate = db.Column(db.DateTime, server_default=db.func.now())
+    FinalPrice = db.Column(db.Numeric(18, 2), nullable=False)

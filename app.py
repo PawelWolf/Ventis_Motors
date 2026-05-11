@@ -1,11 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for
-from database import Database
-from services import ClientPurchase, ResetCarCommand, ResetAllCarsCommand
+from database import db, Car
+from services import ClientPurchase, ResetCarCommand
 from models import CarNotAvailableException
 
 app = Flask(__name__, static_url_path='/media', static_folder='media')
-db = Database()
-"""Użycie klas"""
+
+# KONFIGURACJA POŁĄCZENIA Z AZURE SQL
+# Podstaw dane ze swojego Terraform (server, user, password)
+SQL_CONN = "mssql+pyodbc://wilqu:pawel2137!@ventis-sql-server.database.windows.net/ventis-db?driver=ODBC+Driver+17+for+SQL+Server"
+app.config['SQLALCHEMY_DATABASE_URI'] = SQL_CONN
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
 
 @app.route('/')
 def index():
@@ -15,42 +21,27 @@ def index():
 def client():
     if request.method == 'POST':
         body = request.form['body']
-        engine = request.form['engine']
-        drive = request.form['drive']
         colour = request.form['colour']
         purchase = ClientPurchase(db)
-        """Użycie klas"""
         try:
-            price = purchase.purchase(body, engine, drive, colour)
-            """Użycie metod w klasach"""
+            price = purchase.purchase(body, None, colour)
             car_image = f"{body.lower()}_{colour.lower()}.png"
             return render_template("client_result.html", price=price, car_image=car_image)
         except CarNotAvailableException:
-            """Użycie dziedziczenia, Utworzenie i użycie swojego wyjątku"""
             return render_template("client_result.html", price=None, car_image=None)
     return render_template("client_form.html")
 
 @app.route('/dealer')
 def dealer():
-    cars = db.get_all_cars()
-    """Użycie metod w klasach"""
+    # Pobieramy wszystkie auta z Azure przez ORM
+    cars = Car.query.all()
     return render_template("dealer.html", cars=cars)
 
 @app.route('/reset/<int:car_id>')
 def reset(car_id):
-    cmd = ResetCarCommand(db, car_id)
-    """Użycie klas, Zastosowanie wzorca Command"""
+    cmd = ResetCarCommand(car_id)
     cmd.execute()
-    """Użycie metod w klasach, Polimorfizm"""
     return redirect(url_for('dealer'))
 
-@app.route("/reset_all", methods=["POST"])
-def reset_all():
-    command = ResetAllCarsCommand(db)
-    """Użycie klas, Zastosowanie wzorca Command"""
-    command.execute()
-    """Użycie metod w klasach, Polimorfizm"""
-    return redirect(url_for("dealer"))
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(debug=True)

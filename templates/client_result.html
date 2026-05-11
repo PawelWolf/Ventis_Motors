@@ -19,7 +19,7 @@
                     </div>
                 {% else %}
                     <h1>Sorry!</h1>
-                    <p>Car is not available</p>
+                    <p>Car is not available in our database</p>
                 {% endif %}
             </div>
             <div class="ventis-logo">
@@ -32,32 +32,5 @@
             </div>
         </div>
     </div>
-    <script>
-        const originalTitle = document.title;
-        const scrollText = "🚗💨Dont drive away yet!--- ";
-        let scrollPosition = 0;
-        let animationIntervalId;
-        function scrollTitleStep() {
-            document.title = scrollText.substring(scrollPosition) + scrollText.substring(0, scrollPosition);
-            scrollPosition++;
-            if (scrollPosition >= scrollText.length) {
-                scrollPosition = 0;
-            }
-        }
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                if (animationIntervalId) {
-                    clearInterval(animationIntervalId);
-                }
-                scrollPosition = 0;
-                scrollTitleStep();
-                animationIntervalId = setInterval(scrollTitleStep, 350);
-            } else {
-                clearInterval(animationIntervalId);
-                document.title = originalTitle;
-                scrollPosition = 0; 
-            }
-        });
-    </script>
 </body>
 </html>
