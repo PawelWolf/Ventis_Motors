@@ -6,8 +6,8 @@ from models import CarNotAvailableException
 app = Flask(__name__, static_url_path='/media', static_folder='media')
 
 # KONFIGURACJA POŁĄCZENIA Z AZURE SQL
-# Podstaw dane ze swojego Terraform (server, user, password)
-SQL_CONN = "mssql+pyodbc://wilqu:pawel2137!@ventis-sql-server.database.windows.net/ventis-db?driver=ODBC+Driver+17+for+SQL+Server"
+# Wiele danych zostało skopiowany z terrforma
+SQL_CONN = "mssql+pyodbc://wilqu:Pawel2137!@ventis-sql-server.database.windows.net/ventis-db?driver=ODBC+Driver+17+for+SQL+Server"
 app.config['SQLALCHEMY_DATABASE_URI'] = SQL_CONN
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -33,7 +33,7 @@ def client():
 
 @app.route('/dealer')
 def dealer():
-    # Pobieramy wszystkie auta z Azure przez ORM
+    # Pobranie wszystkich danych z Azure SQL i przekazanie ich do szablonu
     cars = Car.query.all()
     return render_template("dealer.html", cars=cars)
 

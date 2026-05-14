@@ -23,11 +23,11 @@ class CarPurchaseTemplate:
             # Transakcja: Zmień status na 'Sold' (zakładamy ID=2 dla Sold)
             car.StatusID = 2 
             
-            # Dodaj rekord sprzedaży (uproszczone dla klienta/pracownika ID=1)
+            # DOdanie rekordu sprzedaży
             new_sale = Sale(CarID=car.CarID, CustomerID=1, EmployeeID=1, FinalPrice=car.Price)
             
             db.session.add(new_sale)
-            db.session.commit() # ATOMOWOŚĆ TRANSAKCJI
+            db.session.commit() 
             return float(car.Price)
         except Exception as e:
             db.session.rollback()

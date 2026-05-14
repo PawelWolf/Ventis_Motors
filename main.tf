@@ -12,7 +12,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "ventis" {
-  name     = "ventis-rg"
+  name     = "ventis-rg-2-db"
   location = "westeurope"
 }
 
@@ -29,8 +29,8 @@ resource "azurerm_mssql_server" "ventis_sql_server" {
   resource_group_name          = azurerm_resource_group.ventis.name
   location                     = azurerm_resource_group.ventis.location
   version                      = "12.0"
-  administrator_login          = "wilqu"             # TWOJA NAZWA UŻYTKOWNIKA
-  administrator_login_password = "pawel2137"       # TWOJE HASŁO (zmień to!)
+  administrator_login          = "wilqu"           # TWOJA NAZWA UŻYTKOWNIKA
+  administrator_login_password = "Pawel2137!"       # TWOJE HASŁO (zmień to!)
 
   tags = {
     environment = "student"
