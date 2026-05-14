@@ -7,7 +7,7 @@ app = Flask(__name__, static_url_path='/media', static_folder='media')
 
 # KONFIGURACJA POŁĄCZENIA Z AZURE SQL
 # Wiele danych zostało skopiowany z terrforma
-SQL_CONN = "mssql+pyodbc://wilqu:Pawel2137!@ventis-sql-server.database.windows.net/ventis-db?driver=ODBC+Driver+17+for+SQL+Server"
+SQL_CONN = "mssql+pyodbc://wilqu:Pawel2137!@ventis-sql-server-72563.database.windows.net/ventis-db?driver=ODBC+Driver+17+for+SQL+Server"
 app.config['SQLALCHEMY_DATABASE_URI'] = SQL_CONN
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 

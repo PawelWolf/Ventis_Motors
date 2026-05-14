@@ -13,7 +13,7 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "ventis" {
   name     = "ventis-rg-2-db"
-  location = "westeurope"
+  location = "polandcentral"
 }
 
 resource "azurerm_service_plan" "ventis_plan" {
@@ -44,7 +44,8 @@ resource "azurerm_mssql_database" "ventis_db" {
   collation    = "SQL_Latin1_General_CP1_CI_AS"
   license_type = "BasePrice"
   sku_name     = "Basic" # koszt około 5 USD miesięcznie UWAGAAAA: Ten koszt jest naliczany nawet jeśli baza danych jest pusta, więc pamiętaj o usunięciu zasobów po zakończeniu ćwiczenia!
-
+  storage_account_type = "Local"
+  
   tags = {
     environment = "student"
   }
@@ -73,7 +74,7 @@ resource "random_integer" "ri" {
   max = 99999
 }
 resource "azurerm_linux_web_app" "ventis_app" {
-  name                = "ventis-motors-app"
+  name                = "ventis-motors-app-2-db"
   location            = azurerm_resource_group.ventis.location
   resource_group_name = azurerm_resource_group.ventis.name
   service_plan_id     = azurerm_service_plan.ventis_plan.id
@@ -81,7 +82,7 @@ resource "azurerm_linux_web_app" "ventis_app" {
     site_config {
     always_on = false
     application_stack {
-        docker_image_name = "pawelwolf/ventis"
+        docker_image_name = "pawelwolf/ventis2db:latest"
     }
 }
   app_settings = {

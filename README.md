@@ -20,7 +20,11 @@ Application of design pattern: Template method (template method)
 In Html Files JavaScript was also used for "Scroling" Effect.
 
 Running app on cloud:
-http://ventis-motors-app.azurewebsites.net/
+
+SQLITE: http://ventis-motors-app.azurewebsites.net/
+
+AZURE T-SQL: https://ventis-motors-app-2-db.azurewebsites.net/
+
 
 Authors:
 Paweł Wolf

@@ -48,3 +48,11 @@ class Sale(db.Model):
     EmployeeID = db.Column(db.Integer, db.ForeignKey('Employees.EmployeeID'))
     SaleDate = db.Column(db.DateTime, server_default=db.func.now())
     FinalPrice = db.Column(db.Numeric(18, 2), nullable=False)
+
+class Customer(db.Model):
+    __tablename__ = 'Customers'
+    CustomerID = db.Column(db.Integer, primary_key=True)
+    FirstName = db.Column(db.String(50))
+    LastName = db.Column(db.String(50))
+    Email = db.Column(db.String(100), unique=True)
+    Phone = db.Column(db.String(20))
