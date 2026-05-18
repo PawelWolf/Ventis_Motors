@@ -1,4 +1,4 @@
-This is a project for a study subject: object programming in python/ database Systems 
+This is a project for a study subject: object programming in python/database systems 
 
 Instruction:
 After startup, app.py runs the rest of the modules and starts the main Flask server at http://127.0.0.1:5000 on your local PC.
