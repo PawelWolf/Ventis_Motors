@@ -1,10 +1,10 @@
-This is a project for a study subject: object programming in python
+This is a project for a study subject: object programming in python/ database Systems 
 Instruction:
-app.py after being started shoud run rest of modules and a major a flask server on http://127.0.0.1:5000 on your local pc.
+After startup, app.py runs the rest of the modules and starts the main Flask server at http://127.0.0.1:5000 on your local PC.
 
-you can put ip into your browser to see the frontend of app.
+You can put ip into your browser to see the frontend of app.
 
-List of requrements:
+List of requirements:
 Using inheritance
 Using attributes in classes; showing attribute overrides in descendant classes
 Using methods in classes; showing method overrides in descendant classes
