@@ -12,6 +12,7 @@
         <h1>CHOOSE YOUR FUTURE CAR SPECIFICATION</h1>
         <form method="post" class="car_config_form">
             <div class="grid">
+                <!-- Lewa kolumna, góra -->
                 <div class="spec-group body-group">
                     <label for="body-select">Body:</label>
                     <div class="select-wrapper">
@@ -24,6 +25,7 @@
                     </div>
                 </div>
 
+                <!-- Prawa kolumna, góra -->
                 <div class="spec-group engine-group">
                     <label for="fuel-select">Engine Fuel Type:</label>
                     <div class="select-wrapper">
@@ -35,17 +37,32 @@
                     </div>
                 </div>
 
+                <!-- Centrum siatki -->
                 <div class="ventis-logo">
                     <div class="logo-container">
                         <img src="/media/logo.png" alt="Ventis Motors Logo">
                     </div>
                 </div>
 
+                <!-- Lewa kolumna, dół (Wskakuje w wolne miejsce drivearea!) -->
+                <div class="spec-group drive-group">
+                    <label for="employee-select">Sales Representative:</label>
+                    <div class="select-wrapper">
+                        <select name="employee_id" id="employee-select" required>
+                            {% for emp in employees %}
+                                <option value="{{ emp.EmployeeID }}">{{ emp.FirstName }} {{ emp.LastName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Panel przycisków akcji -->
                 <div class="buy-back-buttons">
                     <button type="submit" class="buy-button">Buy</button>
                     <a href="/" class="back-button">Back</a>
                 </div>
 
+                <!-- Prawa kolumna, dół -->
                 <div class="spec-group colour-group">
                     <label for="colour-select">Colour:</label>
                     <div class="select-wrapper">

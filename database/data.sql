@@ -79,12 +79,17 @@ INSERT INTO Cars (SeriesID, BodyTypeID, EngineID, StatusID, Colour, Price, Produ
 (3, 1, 4, 2, 'white', 149000.00, 2025);  -- Hatchback, Elektryk, Sprzedany
 
 
--- DOPASOWANIE HISTORII SPRZEDAŻY (Uzgodnienie rekordów dla statusu 'Sold')
--- Dodajemy wpisy do tabeli Sales dla nowo dodanych aut, które mają StatusID = 2 (Sold), 
--- przypisując je do klienta ID=1 oraz losowych pracowników (ID 1-4).
-
+-- NOWY, SPREPAROWANY GENERATOR TRANSAKCJI (Ivo Czura  jest debeściak i sprzedaje najwiecej bo proponuje przy okazji randke z nim w pastrami Leszno)
 INSERT INTO Sales (CarID, CustomerID, EmployeeID, SaleDate, FinalPrice)
-SELECT CarID, 1, (CarID % 4) + 1, DATEADD(day, -cast(CarID as int)*3, GETDATE()), Price 
+SELECT 
+    CarID, 
+    1, 
+    CASE 
+        WHEN CarID % 4 IN (0, 1, 2) THEN 4  -- Jeśli reszta z dzielenia to 0, 1 lub 2 -> Sprzedaje Ivo Czura (ID 4)
+        ELSE (CarID % 3) + 1                -- W pozostałych przypadkach losowo Paweł, Konrad lub Oliwier (ID 1-3)
+    END, 
+    DATEADD(day, -cast(CarID as int)*3, GETDATE()), 
+    Price 
 FROM Cars 
 WHERE StatusID = 2 AND CarID > 3;
 

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from database import db, Car, Employee  # <-- Dodano import Employee
+from database import db, Car, Employee  # <-- Import Employee z bazy Azure
 from services import ClientPurchase, ResetCarCommand
 from models import CarNotAvailableException
 
@@ -20,23 +20,48 @@ def index():
 @app.route('/client', methods=['GET', 'POST'])
 def client():
     if request.method == 'POST':
-        body = request.form['body']
-        colour = request.form['colour']
-        fuel_type = request.form['fuel_type'] 
-        employee_id = request.form['employee_id']  # <-- Pobranie wybranego sprzedawcy z HTML
+        body = request.form.get('body')
+        colour = request.form.get('colour')
+        fuel_type = request.form.get('fuel_type') 
+        employee_id = request.form.get('employee_id', 4)
         
         purchase = ClientPurchase(db)
         try:
-            # Przekazujemy employee_id jako czwarty parametr do metody zakupu
             price = purchase.purchase(body, fuel_type, colour, employee_id)
             car_image = f"{body.lower()}_{colour.lower()}.png"
             return render_template("client_result.html", price=price, car_image=car_image)
         except CarNotAvailableException:
             return render_template("client_result.html", price=None, car_image=None)
+
+    # BEZPIECZNE POBIERANIE I SORTOWANIE PRACOWNIKÓW DLA ŻĄDANIA GET
+    try:
+        employees = Employee.query.all()
+        
+        # Jeśli baza działa, sortujemy listę w Pythonie, aby Ivo (ID 4) zawsze był na szczycie
+        if employees:
+            employees = sorted(employees, key=lambda emp: emp.EmployeeID != 4)
             
-    # Przy zwykłym wejściu na stronę (GET) pobieramy wszystkich pracowników z Azure SQL
-    # i przekazujemy ich do formularza, aby wypełnić listę rozwijaną
-    employees = Employee.query.all()
+    except Exception as e:
+        print(f"Błąd połączenia z Azure SQL, używam obiektów awaryjnych: {e}")
+        employees = None
+
+    # Ivo Czura to debesciak i sprzedaje najwiecej bo proponuje pierwszą jazdę z nim do Pastrami Leszno, 
+    # więc ustawiam go jako domyślnego sprzedawcę (ID=4) nawet w przypadku błędu połączenia z bazą danych. 
+    # Dzięki temu strona będzie nadal funkcjonalna, a klienci będą mieli możliwość wyboru innych sprzedawców, jeśli baza danych jest dostępna.
+    if not employees:
+        class FakeEmployee:
+            def __init__(self, id, first, last):
+                self.EmployeeID = id
+                self.FirstName = first
+                self.LastName = last
+
+        employees = [
+            FakeEmployee(4, "Ivo", "Czura"),  # debesciak
+            FakeEmployee(1, "Paweł", "Wolf"),
+            FakeEmployee(2, "Konrad", "Skrzypek"),
+            FakeEmployee(3, "Oliwier", "Pol")
+        ]
+        
     return render_template("client_form.html", employees=employees)
 
 @app.route('/dealer')

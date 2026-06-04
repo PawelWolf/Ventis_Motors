@@ -55,6 +55,7 @@ class Car(db.Model):
     body_rel = db.relationship('BodyType', backref='cars')
     status_rel = db.relationship('Status', backref='cars')
     engine_rel = db.relationship('Engine', backref='cars')
+    sales_rel = db.relationship('Sale', backref='car_rel')
 
 class Sale(db.Model):
     __tablename__ = 'Sales'
@@ -64,3 +65,4 @@ class Sale(db.Model):
     EmployeeID = db.Column(db.Integer, db.ForeignKey('Employees.EmployeeID'))
     SaleDate = db.Column(db.DateTime, server_default=db.func.now())
     FinalPrice = db.Column(db.Numeric(18, 2), nullable=False)
+    employee = db.relationship('Employee', backref='sales')
