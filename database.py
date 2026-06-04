@@ -54,6 +54,7 @@ class Car(db.Model):
     series_rel = db.relationship('Series', backref='cars')
     body_rel = db.relationship('BodyType', backref='cars')
     status_rel = db.relationship('Status', backref='cars')
+    engine_rel = db.relationship('Engine', backref='cars')
 
 class Sale(db.Model):
     __tablename__ = 'Sales'

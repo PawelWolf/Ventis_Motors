@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for
-from database import db, Car
+from database import db, Car, Employee  # <-- Dodano import Employee
 from services import ClientPurchase, ResetCarCommand
 from models import CarNotAvailableException
 
 app = Flask(__name__, static_url_path='/media', static_folder='media')
 
 # KONFIGURACJA POŁĄCZENIA Z AZURE SQL
-# Wiele danych zostało skopiowany z terrforma
+# Wiele danych zostało skopiowanych z terraforma
 SQL_CONN = "mssql+pyodbc://wilqu:Pawel2137!@ventis-sql-server-72563.database.windows.net/ventis-db?driver=ODBC+Driver+17+for+SQL+Server"
 app.config['SQLALCHEMY_DATABASE_URI'] = SQL_CONN
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -22,14 +22,22 @@ def client():
     if request.method == 'POST':
         body = request.form['body']
         colour = request.form['colour']
+        fuel_type = request.form['fuel_type'] 
+        employee_id = request.form['employee_id']  # <-- Pobranie wybranego sprzedawcy z HTML
+        
         purchase = ClientPurchase(db)
         try:
-            price = purchase.purchase(body, None, colour)
+            # Przekazujemy employee_id jako czwarty parametr do metody zakupu
+            price = purchase.purchase(body, fuel_type, colour, employee_id)
             car_image = f"{body.lower()}_{colour.lower()}.png"
             return render_template("client_result.html", price=price, car_image=car_image)
         except CarNotAvailableException:
             return render_template("client_result.html", price=None, car_image=None)
-    return render_template("client_form.html")
+            
+    # Przy zwykłym wejściu na stronę (GET) pobieramy wszystkich pracowników z Azure SQL
+    # i przekazujemy ich do formularza, aby wypełnić listę rozwijaną
+    employees = Employee.query.all()
+    return render_template("client_form.html", employees=employees)
 
 @app.route('/dealer')
 def dealer():
