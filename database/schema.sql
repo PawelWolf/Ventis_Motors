@@ -65,3 +65,47 @@ CREATE TABLE Sales (
     SaleDate DATETIME DEFAULT GETDATE(),
     FinalPrice DECIMAL(18, 2) NOT NULL
 );
+
+
+-- ROZBUDOWA STRUKTURY PO KONSULTACJ IZ PROWADZĄCYM 16.05.2026 (Nowe tabele magazynowo-serwisowe)
+
+
+CREATE TABLE Parts (
+    PartID INT PRIMARY KEY IDENTITY(1,1),
+    PartIndex NVARCHAR(50) UNIQUE NOT NULL, -- Unikalny indeks części (OEM)
+    PartName NVARCHAR(100) NOT NULL,
+    UnitPrice DECIMAL(18,2) NOT NULL,
+    StockQuantity INT DEFAULT 0
+);
+
+CREATE TABLE ServiceHistory (
+    ServiceID INT PRIMARY KEY IDENTITY(1,1),
+    CarID INT FOREIGN KEY REFERENCES Cars(CarID),
+    EmployeeID INT FOREIGN KEY REFERENCES Employees(EmployeeID),
+    ServiceDate DATETIME DEFAULT GETDATE(),
+    LaborCost DECIMAL(18,2) NOT NULL,
+    Description NVARCHAR(255)
+);
+
+CREATE TABLE ServiceParts (
+    ServiceID INT FOREIGN KEY REFERENCES ServiceHistory(ServiceID),
+    PartID INT FOREIGN KEY REFERENCES Parts(PartID),
+    Quantity INT NOT NULL,
+    PRIMARY KEY (ServiceID, PartID) -- Klucz złożony
+);
+GO
+
+-- Automated T-SQL Trigger enforcing warehouse inventory integrity
+CREATE TRIGGER TR_OdejmijZMagazynu
+ON ServiceParts
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE p
+    SET p.StockQuantity = p.StockQuantity - i.Quantity
+    FROM Parts p
+    INNER JOIN inserted i ON p.PartID = i.PartID;
+END;
+GO

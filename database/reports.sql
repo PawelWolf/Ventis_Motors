@@ -85,3 +85,27 @@ AND StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available');
 DELETE FROM Customers 
 WHERE Email = 'jan.kowalski@email.com' 
 AND CustomerID NOT IN (SELECT CustomerID FROM Sales);
+
+-- 7. Zaawansowana analiza kosztów serwisu na tle średniej (Window Function)
+-- Cel: Porównanie kosztów przygotowania konkretnego auta do średniej dla całej serii.
+-- UWAGA: W Azure SQL instrukcja CREATE VIEW musi być wykonana jako pierwsze zapytanie w bloku, dlatego oddzielamy ją GO.
+GO
+CREATE VIEW Widok_AnalizaKosztowSerwisu AS
+SELECT 
+    sh.ServiceID,
+    c.CarID,
+    ser.SeriesName,
+    sh.LaborCost,
+    SUM(p.UnitPrice * sp.Quantity) AS KosztCzesci,
+    sh.LaborCost + SUM(p.UnitPrice * sp.Quantity) AS CalkowityKosztSerwisu,
+    AVG(sh.LaborCost + (p.UnitPrice * sp.Quantity)) OVER(PARTITION BY ser.SeriesID) AS SredniaDlaSerii
+FROM ServiceHistory sh
+JOIN Cars c ON sh.CarID = c.CarID
+JOIN Series ser ON c.SeriesID = ser.SeriesID
+JOIN ServiceParts sp ON sh.ServiceID = sp.ServiceID
+JOIN Parts p ON sp.PartID = p.PartID
+GROUP BY sh.ServiceID, c.CarID, ser.SeriesID, ser.SeriesName, sh.LaborCost, p.UnitPrice, sp.Quantity;
+GO
+
+-- Wywołanie testowe widoku analitycznego:
+SELECT * FROM Widok_AnalizaKosztowSerwisu;

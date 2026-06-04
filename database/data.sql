@@ -87,3 +87,27 @@ INSERT INTO Sales (CarID, CustomerID, EmployeeID, SaleDate, FinalPrice)
 SELECT CarID, 1, (CarID % 4) + 1, DATEADD(day, -cast(CarID as int)*3, GETDATE()), Price 
 FROM Cars 
 WHERE StatusID = 2 AND CarID > 3;
+
+-- WYPEŁNIENIE DANYCH DLA MAGAZYNU I SERWISU
+
+
+INSERT INTO Parts (PartIndex, PartName, UnitPrice, StockQuantity) VALUES
+('OEM-BRK-001', 'Klocki hamulcowe Sport V1', 450.00, 20),
+('OEM-FLT-099', 'Filtr powietrza Carbon', 120.00, 50),
+('OEM-EXH-555', 'Układ wydechowy V-Lux Performance', 3200.00, 5),
+('OEM-SUS-777', 'Zawieszenie adaptacyjne Sport', 4100.00, 8),
+('OEM-OIL-002', 'Olej syntetyczny Premium 5W30', 80.00, 100);
+
+-- Dodanie pierwszych zleceń naprawy/tuningu dla istniejących aut
+INSERT INTO ServiceHistory (CarID, EmployeeID, LaborCost, Description) VALUES
+(1, 1, 300.00, 'Przegląd zerowy i wymiana filtrów'),
+(2, 2, 1200.00, 'Montaż pakietu sportowego wydechu i zawieszenia'),
+(3, 3, 500.00, 'Wymiana klocków hamulcowych i uzupełnienie płynów');
+
+-- Zużycie części w konkretnych zleceniach
+INSERT INTO ServiceParts (ServiceID, PartID, Quantity) VALUES
+(1, 2, 1),
+(1, 5, 5),
+(2, 3, 1),
+(2, 4, 1),
+(3, 1, 2);
