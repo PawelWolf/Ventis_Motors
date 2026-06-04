@@ -85,4 +85,3 @@ erDiagram
         decimal UnitPrice
         int StockQuantity
     }
-    ```
