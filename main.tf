@@ -82,7 +82,7 @@ resource "azurerm_linux_web_app" "ventis_app" {
     site_config {
     always_on = false
     application_stack {
-        docker_image_name = "pawelwolf/ventis2db:latest"
+        docker_image_name = "pawelwolf/ventis2db:v2"
     }
 }
   app_settings = {
