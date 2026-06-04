@@ -21,7 +21,7 @@ Ensure you have Python 3.11+ installed. For the Azure T-SQL database connectivit
 
 ### 2. Environment Setup
 Clone the repository and install the required dependencies:
-```bash
+```bash```
 # Clone the repository (replace with your actual URL)
 git clone [https://github.com/pawelwolf/Ventis_Motors.git](https://github.com/pawelwolf/Ventis_Motors.git)
 cd Ventis_Motors
@@ -55,22 +55,107 @@ Template Method Pattern,Codified within CarPurchaseTemplate to enforce a skeleta
 📊 SQL Database Architecture Specification
 The data layer is engineered to model a production-grade relational ecosystem capable of maintaining strict transactional integrity.
 
+🗺️ Entity-Relationship Diagram (ERD)
+Below is the interactive ERD illustrating the complete database schema, including core car models, business operations, and the advanced parts warehouse/service sub-system:
+
+erDiagram
+    Series ||--o{ Cars : "defines"
+    Statuses ||--o{ Cars : "tracks"
+    BodyTypes ||--o{ Cars : "shapes"
+    Engines ||--o{ Cars : "powers"
+    
+    Cars ||--o{ Sales : "is sold via"
+    Customers ||--o{ Sales : "buys"
+    Employees ||--o{ Sales : "processes"
+    
+    Cars ||--o{ ServiceHistory : "undergoes"
+    Employees ||--o{ ServiceHistory : "performs"
+    
+    ServiceHistory ||--o{ ServiceParts : "consumes"
+    Parts ||--o{ ServiceParts : "is used in"
+
+    Series {
+        int SeriesID PK
+        string SeriesName
+        string Description
+    }
+    Statuses {
+        int StatusID PK
+        string StatusName
+    }
+    BodyTypes {
+        int BodyTypeID PK
+        string TypeName
+    }
+    Engines {
+        int EngineID PK
+        float Capacity
+        string FuelType
+        int Horsepower
+    }
+    Cars {
+        int CarID PK
+        int SeriesID FK
+        int BodyTypeID FK
+        int EngineID FK
+        int StatusID FK
+        string Colour
+        decimal Price
+        int ProductionYear
+    }
+    Customers {
+        int CustomerID PK
+        string FirstName
+        string LastName
+        string Email
+        string Phone
+    }
+    Employees {
+        int EmployeeID PK
+        string FirstName
+        string LastName
+        string Position
+    }
+    Sales {
+        int SaleID PK
+        int CarID FK
+        int CustomerID FK
+        int EmployeeID FK
+        datetime SaleDate
+        decimal FinalPrice
+    }
+    ServiceHistory {
+        int ServiceID PK
+        int CarID FK
+        int EmployeeID FK
+        datetime ServiceDate
+        decimal LaborCost
+        string Description
+    }
+    ServiceParts {
+        int ServiceID PK_FK
+        int PartID PK_FK
+        int Quantity
+    }
+    Parts {
+        int PartID PK
+        string PartIndex
+        string PartName
+        decimal UnitPrice
+        int StockQuantity
+    }
+
 Core Database Architecture:
-Schema Blueprint: Designed an explicit data layout spanning 8 tightly-coupled relational tables (exceeding the 6-10 minimum limit), ensuring logical constraints and foreign key mappings.
-
-Transactional Reality Simulation: Native workflows execute data manipulation patterns including INSERT actions (new customer ingestion), UPDATE routines (promotional batch price updates), and DELETE queries complying with data privacy/GDPR mechanics.
-
-Advanced Analytical Reports: Includes 5 sophisticated database queries using complex relational techniques:
-
+Schema Blueprint: Designed an explicit data layout spanning 11 tightly-coupled relational tables (exceeding the 6-10 academic minimum limit), ensuring logical constraints, foreign key mappings, and cascading integrity.
+Transactional Reality Simulation: Native workflows execute advanced data manipulation patterns including INSERT actions (new customer ingestion/service parts intake), UPDATE routines (promotional batch price modifications), and selective conditional DELETE queries complying with data privacy/GDPR mechanics.
+Advanced Analytical Reports & T-SQL Elements: Includes sophisticated database elements engineered using complex relational techniques:
 Transactional revenue aggregation grouped by specific car Series using multiple inner table joins.
-
 Complete matrix compilation of mechanical, core, and financial criteria per vehicle.
-
 High-tier customer profiling through financial aggregation and sorting filters.
-
 Employee sales performance tracking leveraging GROUP BY accompanied by conditional HAVING filters.
-
 Multi-year business tracking using temporal extraction functions (YEAR()).
+Automated T-SQL Stored Triggers: Implemented an AFTER INSERT trigger (TR_OdejmijZMagazynu) that enforces inventory consistency by automatically reducing stock metrics whenever warehouse parts are consumed by a repair order.
+Window Function Analysis: Incorporated AVG() OVER (PARTITION BY ...) analytics to evaluate specific garage operational overhead allocations directly against series-wide baseline margins.
 
 👥 Authors & Team Credits
 
