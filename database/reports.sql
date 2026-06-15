@@ -1,7 +1,7 @@
 -- Uproszczone raporty SQL dla Ventis Motors
 
 -- 1. Zestawienie sprzedaży wg Serii (Łączenie tabel i suma)
--- Cel: Pokazanie, ile zarobiliśmy na każdej serii aut.
+-- Cel: Pokazanie, ile zarobiliśmy na każdej serii aut po tabeli Series.
 SELECT 
     ser.SeriesName, 
     SUM(s.FinalPrice) AS SumaSprzedazy
@@ -9,6 +9,27 @@ FROM Series ser
 JOIN Cars c ON ser.SeriesID = c.SeriesID
 JOIN Sales s ON c.CarID = s.CarID
 GROUP BY ser.SeriesName;
+
+-- 1.A Dodawanie sprzedaży z poziomu aplikacji WEB --- przykład
+
+-- WYKLIKANIE W APLIKACJI
+
+-- 1.B Usuwanie sprzedaży z poziomu zapytania SQL --- przykład
+-- Załóżmy, że chcemy usunąć sprzedaż o SaleID = 5, ale najpierw musimy przywrócić status auta na 'Available' (StatusID = 1), aby zachować spójność danych.
+
+BEGIN TRANSACTION;
+-- 1.B.1 Przywróć status samochodu na 'Available' (StatusID = 1)
+UPDATE Cars
+SET StatusID = 1
+WHERE CarID = (SELECT CarID FROM Sales WHERE SaleID = 19);
+
+-- 1.B.2 Usuń rekord sprzedaży
+DELETE FROM Sales
+WHERE SaleID = 19;
+
+COMMIT TRANSACTION;
+
+
 
 -- 2. Lista aut z ich parametrami technicznymi (Wielokrotny JOIN)
 -- Cel: Wyświetlenie pełnych informacji o aucie w jednym widoku.
@@ -45,6 +66,7 @@ HAVING COUNT(s.SaleID) > 1;
 
 -- 5. Raport sprzedaży z podziałem na rok (Funkcja daty)
 -- Cel: Prosta analiza czasowa sprzedaży.
+
 SELECT 
     YEAR(s.SaleDate) AS RokSprzedazy, 
     COUNT(*) AS LiczbaTransakcji,
@@ -55,18 +77,19 @@ GROUP BY YEAR(s.SaleDate);
 -- 6. Widok (View) dostępności (Wirtualna tabela)
 -- Cel: Stworzenie prostego interfejsu dla sprzedawców łączącego serię, model i cenę.
 -- UWAGA: W Azure SQL 'CREATE VIEW' jako osobne zapytanie w skłądni powinno znaleźć sie przedtem "GO".
-/*
+
 CREATE VIEW Widok_DostepneAuta AS
 SELECT 
     ser.SeriesName AS Seria,
     bt.TypeName AS TypNadwozia,
     c.Colour AS Kolor,
-    c.Price AS CenaKatalogowa
+    c.Price AS CenaKatalogowa,
+    c.CarID AS NumerKatalogowy
 FROM Cars c
 JOIN Series ser ON c.SeriesID = ser.SeriesID
 JOIN BodyTypes bt ON c.BodyTypeID = bt.BodyTypeID
 WHERE c.StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available');
-*/
+
 
 -- SYMULACJA REALNEGO UŻYCIA
 
@@ -74,11 +97,22 @@ WHERE c.StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available'
 INSERT INTO Customers (FirstName, LastName, Email, Phone)
 VALUES ('Jan', 'Kowalski', 'jan.kowalski@email.com', '+48 123 456 789');
 
--- B. MODYFIKACJA (Zmiana ceny auta w promocji - obniżka o 10%)
+-- B. MODYFIKACJA (Zmiana ceny auta w promocji - podwyżka o 50%)
 UPDATE Cars 
-SET Price = Price * 0.9 
-WHERE BodyTypeID = (SELECT BodyTypeID FROM BodyTypes WHERE TypeName = 'hatchback') 
+SET Price = Price * 1.5 
+WHERE BodyTypeID = (SELECT BodyTypeID FROM BodyTypes WHERE TypeName = 'suv') 
 AND StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available');
+
+-- C. SPRZEDAŻ (Zarejestrowanie sprzedaży auta)
+BEGIN TRANSACTION;
+-- C.1. Zaktualizuj status auta na 'Sold' (StatusID = 2)
+UPDATE Cars
+SET StatusID = 2
+WHERE CarID = 1; -- Załóżmy, że sprzedajemy auto o CarID = 33
+-- C.2. Dodaj rekord sprzedaży
+INSERT INTO Sales (CarID, CustomerID, EmployeeID, FinalPrice)
+VALUES (33, (SELECT CustomerID FROM Customers WHERE Email = 'jan.kowalski@email.com'), 1, 200000);
+COMMIT TRANSACTION;
 
 -- C. USUNIĘCIE (Usunięcie klienta, który wycofał zgodę na przetwarzanie danych - RODO)
 -- Uwaga: Usuwamy tylko jeśli nie ma powiązanych rekordów w Sales (spójność kluczy obcych)
