@@ -30,7 +30,6 @@ WHERE SaleID = 19;
 COMMIT TRANSACTION;
 
 
-
 -- 2. Lista aut z ich parametrami technicznymi (Wielokrotny JOIN)
 -- Cel: Wyświetlenie pełnych informacji o aucie w jednym widoku.
 SELECT 
@@ -43,18 +42,7 @@ FROM Cars c
 JOIN BodyTypes bt ON c.BodyTypeID = bt.BodyTypeID
 JOIN Engines e ON c.EngineID = e.EngineID;
 
--- 3. Najlepsi klienci (Agregacja i Sortowanie)
--- Cel: Znalezienie klientów, którzy kupili u nas najdroższe auta.
-SELECT 
-    cust.FirstName, 
-    cust.LastName, 
-    s.FinalPrice
-FROM Customers cust
-JOIN Sales s ON cust.CustomerID = s.CustomerID
-WHERE s.FinalPrice > 80000
-ORDER BY s.FinalPrice DESC;
-
--- 4. Liczba aut sprzedanych przez każdego pracownika (Group By i Having)
+-- 3. Liczba aut sprzedanych przez każdego pracownika (Group By i Having)
 -- Cel: Sprawdzenie aktywności pracowników (tylko tych, co sprzedali więcej niż 1 auto).
 SELECT 
     e.LastName, 
@@ -64,8 +52,8 @@ JOIN Sales s ON e.EmployeeID = s.EmployeeID
 GROUP BY e.LastName
 HAVING COUNT(s.SaleID) > 1;
 
--- 5. Raport sprzedaży z podziałem na rok (Funkcja daty)
--- Cel: Prosta analiza czasowa sprzedaży.
+-- 4. Raport sprzedaży z podziałem na rok (Funkcja daty, analiza czasowa)
+
 
 SELECT 
     YEAR(s.SaleDate) AS RokSprzedazy, 
@@ -74,10 +62,9 @@ SELECT
 FROM Sales s
 GROUP BY YEAR(s.SaleDate);
 
--- 6. Widok (View) dostępności (Wirtualna tabela)
--- Cel: Stworzenie prostego interfejsu dla sprzedawców łączącego serię, model i cenę.
+-- 5. Widok (View) dostępności (Wirtualna tabela, interfejs dla sprzedawcaów pokazujący tylko dostępne auta)
 -- UWAGA: W Azure SQL 'CREATE VIEW' jako osobne zapytanie w skłądni powinno znaleźć sie przedtem "GO".
-
+GO
 CREATE VIEW Widok_DostepneAuta AS
 SELECT 
     ser.SeriesName AS Seria,
@@ -89,9 +76,9 @@ FROM Cars c
 JOIN Series ser ON c.SeriesID = ser.SeriesID
 JOIN BodyTypes bt ON c.BodyTypeID = bt.BodyTypeID
 WHERE c.StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available');
+GO
 
-
--- SYMULACJA REALNEGO UŻYCIA
+-- 6. SYMULACJA REALNEGO UŻYCIA
 
 -- A. WPROWADZANIE (Nowy klient przyszedł do salonu)
 INSERT INTO Customers (FirstName, LastName, Email, Phone)
@@ -108,7 +95,7 @@ BEGIN TRANSACTION;
 -- C.1. Zaktualizuj status auta na 'Sold' (StatusID = 2)
 UPDATE Cars
 SET StatusID = 2
-WHERE CarID = 1; -- Załóżmy, że sprzedajemy auto o CarID = 33
+WHERE CarID = 33; -- Załóżmy, że sprzedajemy auto o CarID = 33
 -- C.2. Dodaj rekord sprzedaży
 INSERT INTO Sales (CarID, CustomerID, EmployeeID, FinalPrice)
 VALUES (33, (SELECT CustomerID FROM Customers WHERE Email = 'jan.kowalski@email.com'), 1, 200000);
