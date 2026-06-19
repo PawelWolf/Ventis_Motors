@@ -1,7 +1,6 @@
--- Uproszczone raporty SQL dla Ventis Motors
+-- KORPORACYJNE RAPORTY ANALITYCZNE DLA VENTIS MOTORS
 
--- 1. Zestawienie sprzedaży wg Serii (Łączenie tabel i suma)
--- Cel: Pokazanie, ile zarobiliśmy na każdej serii aut po tabeli Series.
+-- 1. Zestawienie łącznej sprzedaży według Serii pojazdów
 SELECT 
     ser.SeriesName, 
     SUM(s.FinalPrice) AS SumaSprzedazy
@@ -10,28 +9,7 @@ JOIN Cars c ON ser.SeriesID = c.SeriesID
 JOIN Sales s ON c.CarID = s.CarID
 GROUP BY ser.SeriesName;
 
--- 1.A Dodawanie sprzedaży z poziomu aplikacji WEB --- przykład
-
--- WYKLIKANIE W APLIKACJI
-
--- 1.B Usuwanie sprzedaży z poziomu zapytania SQL --- przykład
--- Załóżmy, że chcemy usunąć sprzedaż o SaleID = 5, ale najpierw musimy przywrócić status auta na 'Available' (StatusID = 1), aby zachować spójność danych.
-
-BEGIN TRANSACTION;
--- 1.B.1 Przywróć status samochodu na 'Available' (StatusID = 1)
-UPDATE Cars
-SET StatusID = 1
-WHERE CarID = (SELECT CarID FROM Sales WHERE SaleID = 19);
-
--- 1.B.2 Usuń rekord sprzedaży
-DELETE FROM Sales
-WHERE SaleID = 19;
-
-COMMIT TRANSACTION;
-
-
--- 2. Lista aut z ich parametrami technicznymi (Wielokrotny JOIN)
--- Cel: Wyświetlenie pełnych informacji o aucie w jednym widoku.
+-- 2. Lista aut z pełną specyfikacją techniczną (Wielokrotny JOIN)
 SELECT 
     c.CarID, 
     bt.TypeName AS TypNadwozia, 
@@ -42,8 +20,7 @@ FROM Cars c
 JOIN BodyTypes bt ON c.BodyTypeID = bt.BodyTypeID
 JOIN Engines e ON c.EngineID = e.EngineID;
 
--- 3. Liczba aut sprzedanych przez każdego pracownika (Group By i Having)
--- Cel: Sprawdzenie aktywności pracowników (tylko tych, co sprzedali więcej niż 1 auto).
+-- 3. Wyniki sprzedażowe pracowników (Ranking z filtrem HAVING)
 SELECT 
     e.LastName, 
     COUNT(s.SaleID) AS IloscSprzedanych
@@ -52,9 +29,7 @@ JOIN Sales s ON e.EmployeeID = s.EmployeeID
 GROUP BY e.LastName
 HAVING COUNT(s.SaleID) > 1;
 
--- 4. Raport sprzedaży z podziałem na rok (Funkcja daty, analiza czasowa)
-
-
+-- 4. Analiza czasowa przychodów salonu w podziale na lata
 SELECT 
     YEAR(s.SaleDate) AS RokSprzedazy, 
     COUNT(*) AS LiczbaTransakcji,
@@ -62,8 +37,7 @@ SELECT
 FROM Sales s
 GROUP BY YEAR(s.SaleDate);
 
--- 5. Widok (View) dostępności (Wirtualna tabela, interfejs dla sprzedawcaów pokazujący tylko dostępne auta)
--- UWAGA: W Azure SQL 'CREATE VIEW' jako osobne zapytanie w skłądni powinno znaleźć sie przedtem "GO".
+-- 5. WIDOK: Interfejs szybkiej weryfikacji dostępnych aut dla sprzedawców
 GO
 CREATE VIEW Widok_DostepneAuta AS
 SELECT 
@@ -78,38 +52,22 @@ JOIN BodyTypes bt ON c.BodyTypeID = bt.BodyTypeID
 WHERE c.StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available');
 GO
 
--- 6. SYMULACJA REALNEGO UŻYCIA
+-- 6. GŁÓWNY RAPORT SERWISOWY (Mapowanie Części, Zleceń i Statusów aut)
+SELECT 
+    sh.ServiceID,
+    c.CarID,
+    st.StatusName AS StatusAutaNaStronie,
+    sh.Description AS OpisZlecenia,
+    p.PartName AS UzytaCzesc,
+    sp.Quantity AS IloscSztuk,
+    p.UnitPrice * sp.Quantity AS KosztCzesciBrutto
+FROM ServiceHistory sh
+JOIN Cars c ON sh.CarID = c.CarID
+JOIN Statuses st ON c.StatusID = st.StatusID
+JOIN ServiceParts sp ON sh.ServiceID = sp.ServiceID
+JOIN Parts p ON sp.PartID = p.PartID;
 
--- A. WPROWADZANIE (Nowy klient przyszedł do salonu)
-INSERT INTO Customers (FirstName, LastName, Email, Phone)
-VALUES ('Jan', 'Kowalski', 'jan.kowalski@email.com', '+48 123 456 789');
-
--- B. MODYFIKACJA (Zmiana ceny auta w promocji - podwyżka o 50%)
-UPDATE Cars 
-SET Price = Price * 1.5 
-WHERE BodyTypeID = (SELECT BodyTypeID FROM BodyTypes WHERE TypeName = 'suv') 
-AND StatusID = (SELECT StatusID FROM Statuses WHERE StatusName = 'Available');
-
--- C. SPRZEDAŻ (Zarejestrowanie sprzedaży auta)
-BEGIN TRANSACTION;
--- C.1. Zaktualizuj status auta na 'Sold' (StatusID = 2)
-UPDATE Cars
-SET StatusID = 2
-WHERE CarID = 33; -- Załóżmy, że sprzedajemy auto o CarID = 33
--- C.2. Dodaj rekord sprzedaży
-INSERT INTO Sales (CarID, CustomerID, EmployeeID, FinalPrice)
-VALUES (33, (SELECT CustomerID FROM Customers WHERE Email = 'jan.kowalski@email.com'), 1, 200000);
-COMMIT TRANSACTION;
-
--- C. USUNIĘCIE (Usunięcie klienta, który wycofał zgodę na przetwarzanie danych - RODO)
--- Uwaga: Usuwamy tylko jeśli nie ma powiązanych rekordów w Sales (spójność kluczy obcych)
-DELETE FROM Customers 
-WHERE Email = 'jan.kowalski@email.com' 
-AND CustomerID NOT IN (SELECT CustomerID FROM Sales);
-
--- 7. Zaawansowana analiza kosztów serwisu na tle średniej (Window Function)
--- Cel: Porównanie kosztów przygotowania konkretnego auta do średniej dla całej serii.
--- UWAGA: W Azure SQL instrukcja CREATE VIEW musi być wykonana jako pierwsze zapytanie w bloku, dlatego oddzielamy ją GO.
+-- 7. WIDOK: Analiza kosztów przygotowania auta na tle średniej dla Serii (Window Function)
 GO
 CREATE VIEW Widok_AnalizaKosztowSerwisu AS
 SELECT 
@@ -128,5 +86,40 @@ JOIN Parts p ON sp.PartID = p.PartID
 GROUP BY sh.ServiceID, c.CarID, ser.SeriesID, ser.SeriesName, sh.LaborCost, p.UnitPrice, sp.Quantity;
 GO
 
--- Wywołanie testowe widoku analitycznego:
-SELECT * FROM Widok_AnalizaKosztowSerwisu;
+-- 8. RAPORT: Czysty zysk salonu ze sprzedaży po odliczeniu kosztów serwisu i części
+SELECT 
+    c.CarID,
+    ser.SeriesName AS Seria,
+    c.Price AS CenaKatalogowa,
+    ISNULL(sh.LaborCost, 0) AS KosztRobocizny,
+    ISNULL(SUM(p.UnitPrice * sp.Quantity), 0) AS KosztCzesci,
+    c.Price - (ISNULL(sh.LaborCost, 0) + ISNULL(SUM(p.UnitPrice * sp.Quantity), 0)) AS CzystyZyskSalonu
+FROM Cars c
+JOIN Series ser ON c.SeriesID = ser.SeriesID
+LEFT JOIN ServiceHistory sh ON c.CarID = sh.CarID
+LEFT JOIN ServiceParts sp ON sh.ServiceID = sp.ServiceID
+LEFT JOIN Parts p ON sp.PartID = p.PartID
+GROUP BY c.CarID, ser.SeriesName, c.Price, sh.LaborCost
+ORDER BY CzystyZyskSalonu DESC;
+
+-- 9. RAPORT PREMIUM: Ranking najdroższych napraw wewnątrz każdej Serii (CTE + RANK())
+WITH PodsumowanieSerwisuCTE AS (
+    SELECT 
+        ser.SeriesName AS Seria,
+        sh.CarID,
+        sh.Description AS OpisNaprawy,
+        sh.LaborCost + ISNULL(SUM(p.UnitPrice * sp.Quantity), 0) AS KosztCalkowity
+    FROM ServiceHistory sh
+    JOIN Cars c ON sh.CarID = c.CarID
+    JOIN Series ser ON c.SeriesID = ser.SeriesID
+    LEFT JOIN ServiceParts sp ON sh.ServiceID = sp.ServiceID
+    LEFT JOIN Parts p ON sp.PartID = p.PartID
+    GROUP BY ser.SeriesName, sh.CarID, sh.Description, sh.LaborCost
+)
+SELECT 
+    Seria,
+    CarID,
+    OpisNaprawy,
+    KosztCalkowity,
+    RANK() OVER (PARTITION BY Seria ORDER BY KosztCalkowity DESC) AS PozycjaWSerii
+FROM PodsumowanieSerwisuCTE;
