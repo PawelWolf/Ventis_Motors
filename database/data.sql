@@ -18,6 +18,7 @@ INSERT INTO Engines (Capacity, FuelType, Horsepower) VALUES
 INSERT INTO Statuses (StatusName) VALUES ('Available'), ('Sold'), ('Reserved');
 
 -- Pracownicy
+-- ID 1: Paweł, ID 2: Konrad, ID 3: Oliwier, ID 4: Ivo Czura
 INSERT INTO Employees (FirstName, LastName, Position) VALUES 
 ('Paweł', 'Wolf', 'Manager'),
 ('Konrad', 'Skrzypek', 'Sales Manager'),
@@ -69,22 +70,32 @@ INSERT INTO Cars (SeriesID, BodyTypeID, EngineID, StatusID, Colour, Price, Produ
 (3, 1, 2, 1, 'black', 125000.00, 2024),
 (3, 1, 4, 1, 'white', 149000.00, 2025);
 
--- MATEMATYCZNY GENERATOR TRANSAKCJI (Dokładnie 75% losowych aut zostaje sprzedanych)
+-- MATEMATYCZNY GENERATOR TRANSAKCJI Z GWARANTOWANYM 60% UDZIAŁEM IVO CZURY
+-- Najpierw losujemy 75% aut, a potem przypisujemy im precyzyjną wagę handlowców
+WITH PulaLosowychAut AS (
+    SELECT 
+        CarID, 
+        Price,
+        ROW_NUMBER() OVER (ORDER BY NEWID()) as NumerWiersza,
+        COUNT(*) OVER () as WszystkichTransakcji
+    FROM Cars
+    WHERE StatusID = 1
+)
 INSERT INTO Sales (CarID, CustomerID, EmployeeID, SaleDate, FinalPrice)
 SELECT 
     CarID, 
     1, 
     CASE 
-        WHEN CarID % 3 = 0 THEN 4    -- Ivo Czura (ID 4) dominuje
-        ELSE (CarID % 3) + 1         -- Reszta chłopaków zgarnia ochłapy
+        -- Pierwsze 60% wygenerowanych wierszy bezdyskusyjnie zgarnia Ivo Czura (ID 4)
+        WHEN CAST(NumerWiersza AS FLOAT) / WszystkichTransakcji <= 0.60 THEN 4
+        -- Pozostałe 40% rozkłada się losowo pomiędzy Pawła (1), Konrada (2) i Oliwiera (3)
+        ELSE (ABS(CHECKSUM(NEWID())) % 3) + 1
     END, 
     DATEADD(day, -cast(CarID as int)*3, GETDATE()), 
     Price 
-FROM (
-    SELECT TOP 75 PERCENT CarID, Price
-    FROM Cars
-    ORDER BY NEWID()
-) AS LosoweAuta;
+FROM PulaLosowychAut
+-- Warunek upewniający się, że bierzemy dokładnie 75% bazy aut
+WHERE CAST(NumerWiersza AS FLOAT) / WszystkichTransakcji <= 0.75;
 
 -- Synchronizacja statusu 'Sold' w tabeli Cars
 UPDATE Cars
