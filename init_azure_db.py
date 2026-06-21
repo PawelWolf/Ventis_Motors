@@ -30,17 +30,24 @@ def execute_sql_file(cursor, file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    statements = content.split("GO")
+    # Rozbijamy plik na bloki rozdzielone przez GO (niezależnie od wielkości liter)
+    import re
+    statements = re.split(r'\bGO\b', content, flags=re.IGNORECASE)
+    
     for statement in statements:
         stmt = statement.strip()
         if stmt:
             try:
                 cursor.execute(stmt)
             except Exception as e:
+                # Ignorujemy błędy o już istniejących obiektach, resztę raportujemy
                 if "already an object named" in str(e) or "already exists" in str(e):
                     continue
                 else:
-                    print(f"Blad instrukcji SQL: {e}")
+                    print(f"Blad instrukcji SQL w {file_path}: {e}")
+                    # Jeśli błąd dotyczy tworzenia struktury, przerywamy potok
+                    if "schema.sql" in file_path:
+                        raise e
     return True
 
 try:
@@ -48,15 +55,12 @@ try:
     conn = pyodbc.connect(conn_str, autocommit=True)
     cursor = conn.cursor()
 
-    # --- TUTAJ JEST ZAORANIE BAZY CZY ZADZIAŁA hmmm---
     print("Czyszczenie starych tabel przed świeżym wdrożeniem...")
-    # Kolejność usuwania ma znaczenie ze względu na klucze obce (FOREIGN KEY)
     cursor.execute("""
         DROP TABLE IF EXISTS ServiceParts, ServiceHistory, Parts, Sales, 
                              Cars, Statuses, Employees, Customers, Series, BodyTypes;
     """)
     print("Baza zostala wyczyszczona.")
-    # --------------------------------
 
     print("Tworzenie struktury tabel (database/schema.sql)...")
     execute_sql_file(cursor, "database/schema.sql")
