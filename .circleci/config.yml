@@ -3,36 +3,25 @@ version: 2.1
 jobs:
   build_and_deploy:
     docker:
-      - image: pawelwolf/ventis2db:v3
-        auth:
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
+      - image: cimg/base:stable
     steps:
       - checkout
       
-      # POPRAWKA: Usunęliśmy 'sudo' na początku komendy
-      - run:
-          name: Instalacja narzedzi systemowych (make)
-          command: |
-            apt-get update && apt-get install -y make
-
-      - run:
-          name: Sprawdzanie jakosci kodu (Linter)
-          command: |
-            make lint || true
-
       - setup_remote_docker:
           version: default
 
       - run:
-          name: Budowanie nowego obrazu Docker
+          name: Budowanie naprawionego obrazu (DOCKER LATEST)
           command: |
-            make docker_build
+            docker build -t pawelwolf/ventis2db:latest .
 
       - run:
-          name: Wypychanie obrazu na Docker Hub
+          name: Logowanie i nadpisywanie obrazu na Docker Hubie jako LATEST i V3
           command: |
-            make docker_push
+            echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+            docker tag pawelwolf/ventis2db:latest pawelwolf/ventis2db:v3
+            docker push pawelwolf/ventis2db:latest
+            docker push pawelwolf/ventis2db:v3
 
 workflows:
   version: 2
