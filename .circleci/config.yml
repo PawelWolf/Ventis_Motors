@@ -11,6 +11,11 @@ jobs:
       - checkout
       
       - run:
+          name: Instalacja narzedzi systemowych (make)
+          command: |
+            sudo apt-get update && sudo apt-get install -y make
+
+      - run:
           name: Sprawdzanie jakosci kodu (Linter)
           command: |
             make lint || true
