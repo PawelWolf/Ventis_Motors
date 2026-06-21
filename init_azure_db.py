@@ -1,6 +1,7 @@
 import os
 import sys
 import pyodbc
+import re
 
 server = os.getenv("DB_SERVER")
 database = os.getenv("DB_NAME", "ventis-db")
@@ -22,7 +23,7 @@ conn_str = (
     "Connection Timeout=30;"
 )
 
-def execute_sql_file(cursor, file_path):
+def execute_sql_file(conn, cursor, file_path):
     if not os.path.exists(file_path):
         print(f"Nie znaleziono pliku: {file_path}")
         return False
@@ -30,8 +31,7 @@ def execute_sql_file(cursor, file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Rozbijamy plik na bloki rozdzielone przez GO (niezależnie od wielkości liter)
-    import re
+    # Rozbijamy plik za pomoca słowa GO jako osobne bloki transakcyjne
     statements = re.split(r'\bGO\b', content, flags=re.IGNORECASE)
     
     for statement in statements:
@@ -39,20 +39,20 @@ def execute_sql_file(cursor, file_path):
         if stmt:
             try:
                 cursor.execute(stmt)
+                conn.commit()  # Wymuszamy natychmiastowe zapisanie tabeli w Azure przed kolejnym krokiem!
             except Exception as e:
-                # Ignorujemy błędy o już istniejących obiektach, resztę raportujemy
                 if "already an object named" in str(e) or "already exists" in str(e):
                     continue
                 else:
                     print(f"Blad instrukcji SQL w {file_path}: {e}")
-                    # Jeśli błąd dotyczy tworzenia struktury, przerywamy potok
                     if "schema.sql" in file_path:
                         raise e
     return True
 
 try:
     print(f"Laczenie z Azure SQL: {server}...")
-    conn = pyodbc.connect(conn_str, autocommit=True)
+    # Wyłączamy autocommit, żeby kontrolować moment zapisu transakcji
+    conn = pyodbc.connect(conn_str, autocommit=False)
     cursor = conn.cursor()
 
     print("Czyszczenie starych tabel przed świeżym wdrożeniem...")
@@ -60,16 +60,18 @@ try:
         DROP TABLE IF EXISTS ServiceParts, ServiceHistory, Parts, Sales, 
                              Cars, Statuses, Employees, Customers, Series, BodyTypes;
     """)
+    conn.commit()
     print("Baza zostala wyczyszczona.")
 
     print("Tworzenie struktury tabel (database/schema.sql)...")
-    execute_sql_file(cursor, "database/schema.sql")
+    execute_sql_file(conn, cursor, "database/schema.sql")
 
     print("Tworzenie rekordu CustomerID = 1 dla relacji klucza obcego...")
     cursor.execute("INSERT INTO Customers (FirstName, LastName, Email, Phone) VALUES ('Pierwszy', 'Klient', 'klient@ventis.pl', '123456789')")
+    conn.commit()
 
     print("Uruchamianie skryptu danych (database/data.sql)...")
-    execute_sql_file(cursor, "database/data.sql")
+    execute_sql_file(conn, cursor, "database/data.sql")
     print("Wstrzykiwanie danych zakonczone.")
 
     cursor.close()
