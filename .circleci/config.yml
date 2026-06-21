@@ -3,23 +3,19 @@ version: 2.1
 jobs:
   build_and_check:
     docker:
-      - image: cimg/python:3.10
-    steps:
-      - checkout # Pobiera kod Ventis_Motors z GitHuba
       
-      - run:
-          name: Instalacja narzedzi
-          command: |
-            python -m venv venv
-            . venv/bin/activate
-            make deps
-            
+      - image: pawelwolf/ventis2db:v3
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      
       - run:
           name: Sprawdzanie jakosci kodu (Linter)
           command: |
-            . venv/bin/activate
-            make lint || true # Bezpiecznik: przejdzie nawet jeśli masz luźne pliki .py
-
+            make lint || true
+            
 workflows:
   version: 2
   weryfikacja_ventis:
