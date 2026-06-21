@@ -31,15 +31,11 @@ def execute_full_file(conn, cursor, file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Pozbywamy się ewentualnych ukrytych instrukcji GO w tekście, jeśli jakieś zostały
+    # Czyszczenie ewentualnych śmieci po GO
     content = content.replace("GO\n", "\n").replace("GO\r", "\r")
     
-    try:
-        cursor.execute(content)
-        conn.commit()
-    except Exception as e:
-        print(f"Blad podczas wykonywania pliku {file_path}: {e}")
-        raise e
+    cursor.execute(content)
+    conn.commit()
     return True
 
 try:
@@ -55,14 +51,32 @@ try:
     conn.commit()
     print("Baza zostala wyczyszczona.")
 
-    print("Tworzenie struktury tabel i triggera...")
+    print("Tworzenie struktury tabel (database/schema.sql)...")
     execute_full_file(conn, cursor, "database/schema.sql")
+
+    print("Tworzenie automatycznego triggera magazynowego...")
+    trigger_sql = """
+    CREATE TRIGGER TR_OdejmijZMagazynu
+    ON ServiceParts
+    AFTER INSERT
+    AS
+    BEGIN
+        SET NOCOUNT ON;
+        UPDATE p
+        SET p.StockQuantity = p.StockQuantity - i.Quantity
+        FROM Parts p
+        INNER JOIN inserted i ON p.PartID = i.PartID;
+    END;
+    """
+    cursor.execute(trigger_sql)
+    conn.commit()
+    print("Trigger zostal pomyslnie utworzony.")
 
     print("Tworzenie rekordu CustomerID = 1...")
     cursor.execute("INSERT INTO Customers (FirstName, LastName, Email, Phone) VALUES ('Pierwszy', 'Klient', 'klient@ventis.pl', '123456789')")
     conn.commit()
 
-    print("Uruchamianie skryptu danych...")
+    print("Uruchamianie skryptu danych (database/data.sql)...")
     execute_full_file(conn, cursor, "database/data.sql")
     print("Wstrzykiwanie danych zakonczone.")
 
