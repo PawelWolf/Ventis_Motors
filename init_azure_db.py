@@ -4,7 +4,7 @@ import pyodbc
 
 server = os.getenv("DB_SERVER")
 database = os.getenv("DB_NAME", "ventis-db")
-username = os.getenv("DOCKER_USERNAME")
+username = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
 
 if not all([server, database, username, password]):
