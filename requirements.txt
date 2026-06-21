@@ -8,3 +8,4 @@ gunicorn
 flask-sqlalchemy
 pyodbc
 # SQLite3 jest zawarty w pythonie 3.11
+flake8==6.1.0
