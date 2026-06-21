@@ -1,9 +1,8 @@
 version: 2.1
 
 jobs:
-  build_and_check:
+  build_and_deploy:
     docker:
-      
       - image: pawelwolf/ventis2db:v3
         auth:
           username: $DOCKER_USERNAME
@@ -15,9 +14,22 @@ jobs:
           name: Sprawdzanie jakosci kodu (Linter)
           command: |
             make lint || true
-            
+
+      - setup_remote_docker:
+          version: default
+
+      - run:
+          name: Budowanie nowego obrazu Docker
+          command: |
+            make docker_build
+
+      - run:
+          name: Wypychanie obrazu na Docker Hub
+          command: |
+            make docker_push
+
 workflows:
   version: 2
-  weryfikacja_ventis:
+  weryfikacja_i_wypychanie:
     jobs:
-      - build_and_check
+      - build_and_deploy
