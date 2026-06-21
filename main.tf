@@ -29,8 +29,8 @@ resource "azurerm_mssql_server" "ventis_sql_server" {
   resource_group_name          = azurerm_resource_group.ventis.name
   location                     = azurerm_resource_group.ventis.location
   version                      = "12.0"
-  administrator_login          = "wilqu"           # TWOJA NAZWA UŻYTKOWNIKA
-  administrator_login_password = "Pawel2137!"       # TWOJE HASŁO (zmień to!)
+  administrator_login          = var.db_admin_user
+  administrator_login_password = var.db_admin_password
 
   tags = {
     environment = "student"
@@ -88,4 +88,15 @@ resource "azurerm_linux_web_app" "ventis_app" {
   app_settings = {
     WEBSITES_PORT = "5000"
   }
+}
+variable "db_admin_user" {
+  type        = string
+  description = "Nazwa administratora bazy danych"
+  sensitive   = true
+}
+
+variable "db_admin_password" {
+  type        = string
+  description = "Haslo administratora bazy danych"
+  sensitive   = true
 }
