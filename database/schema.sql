@@ -93,3 +93,15 @@ CREATE TABLE ServiceParts (
     Quantity INT NOT NULL,
     PRIMARY KEY (ServiceID, PartID) -- Klucz złożony
 );
+
+CREATE TRIGGER TR_OdejmijZMagazynu
+ON ServiceParts
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE p
+    SET p.StockQuantity = p.StockQuantity - i.Quantity
+    FROM Parts p
+    INNER JOIN inserted i ON p.PartID = i.PartID;
+END;

@@ -32,7 +32,6 @@ def execute_sql_file_safely(conn, cursor, file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Pancerny podział: wyłapuje 'GO' otoczone dowolnymi białymi znakami lub liniami
     statements = re.split(r'^\s*GO\s*$', content, flags=re.IGNORECASE | re.MULTILINE)
     
     for statement in statements:
@@ -42,7 +41,6 @@ def execute_sql_file_safely(conn, cursor, file_path):
                 cursor.execute(stmt)
                 conn.commit()
             except Exception as e:
-                # Jeśli obiekt już istnieje, ignorujemy i idziemy dalej
                 if "already an object named" in str(e) or "already exists" in str(e):
                     continue
                 else:
@@ -56,7 +54,6 @@ try:
     cursor = conn.cursor()
 
     print("Czyszczenie starych tabel przed świeżym wdrożeniem...")
-    # Usuwamy tabele w kolejności zależności kluczy obcych
     for table in ["ServiceParts", "ServiceHistory", "Parts", "Sales", "Cars", "Statuses", "Employees", "Customers", "Series", "BodyTypes"]:
         try:
             cursor.execute(f"DROP TABLE IF EXISTS {table};")
@@ -65,32 +62,8 @@ try:
             pass
     print("Baza zostala wyczyszczona.")
 
-    print("Tworzenie struktury tabel (database/schema.sql)...")
+    print("Tworzenie struktury tabel i triggera (database/schema.sql)...")
     execute_sql_file_safely(conn, cursor, "database/schema.sql")
-
-    print("Tworzenie automatycznego triggera magazynowego...")
-    trigger_sql = """
-    CREATE TRIGGER TR_OdejmijZMagazynu
-    ON ServiceParts
-    AFTER INSERT
-    AS
-    BEGIN
-        SET NOCOUNT ON;
-        UPDATE p
-        SET p.StockQuantity = p.StockQuantity - i.Quantity
-        FROM Parts p
-        INNER JOIN inserted i ON p.PartID = i.PartID;
-    END;
-    """
-    try:
-        cursor.execute(trigger_sql)
-        conn.commit()
-        print("Trigger zostal pomyslnie utworzony.")
-    except Exception as e:
-        if "already exists" in str(e) or "already an object" in str(e):
-            print("Trigger juz istnieje, pomijam.")
-        else:
-            raise e
 
     print("Tworzenie rekordu CustomerID = 1...")
     try:
