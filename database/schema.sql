@@ -93,8 +93,6 @@ CREATE TABLE ServiceParts (
     Quantity INT NOT NULL,
     PRIMARY KEY (ServiceID, PartID) -- Klucz złożony
 );
-GO
-
 -- Automated T-SQL Trigger enforcing warehouse inventory integrity
 CREATE TRIGGER TR_OdejmijZMagazynu
 ON ServiceParts
@@ -108,4 +106,3 @@ BEGIN
     FROM Parts p
     INNER JOIN inserted i ON p.PartID = i.PartID;
 END;
-GO
