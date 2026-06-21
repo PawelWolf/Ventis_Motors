@@ -48,22 +48,25 @@ try:
     conn = pyodbc.connect(conn_str, autocommit=True)
     cursor = conn.cursor()
 
-    # POPRAWIONE ŚCIEŻKI: dodany podfolder 'database'
+    # --- TUTAJ JEST ZAORANIE BAZY CZY ZADZIAŁA hmmm---
+    print("Czyszczenie starych tabel przed świeżym wdrożeniem...")
+    # Kolejność usuwania ma znaczenie ze względu na klucze obce (FOREIGN KEY)
+    cursor.execute("""
+        DROP TABLE IF EXISTS ServiceParts, ServiceHistory, Parts, Sales, 
+                             Cars, Statuses, Employees, Customers, Series, BodyTypes;
+    """)
+    print("Baza zostala wyczyszczona.")
+    # --------------------------------
+
     print("Tworzenie struktury tabel (database/schema.sql)...")
     execute_sql_file(cursor, "database/schema.sql")
 
-    cursor.execute("SELECT COUNT(*) FROM Customers")
-    if cursor.fetchone()[0] == 0:
-        print("Tworzenie rekordu CustomerID = 1 dla relacji klucza obcego...")
-        cursor.execute("INSERT INTO Customers (FirstName, LastName, Email, Phone) VALUES ('Pierwszy', 'Klient', 'klient@ventis.pl', '123456789')")
+    print("Tworzenie rekordu CustomerID = 1 dla relacji klucza obcego...")
+    cursor.execute("INSERT INTO Customers (FirstName, LastName, Email, Phone) VALUES ('Pierwszy', 'Klient', 'klient@ventis.pl', '123456789')")
 
-    cursor.execute("SELECT COUNT(*) FROM Series")
-    if cursor.fetchone()[0] == 0:
-        print("Wstrzykiwanie danych (database/data.sql)...")
-        execute_sql_file(cursor, "database/data.sql")
-        print("Rekordy zostaly pomyślnie wgrane!")
-    else:
-        print("Dane w bazie juz istnieja. Pomijam data.sql.")
+    print("Uruchamianie skryptu danych (database/data.sql)...")
+    execute_sql_file(cursor, "database/data.sql")
+    print("Wstrzykiwanie danych zakonczone.")
 
     cursor.close()
     conn.close()
