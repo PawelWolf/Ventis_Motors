@@ -23,6 +23,11 @@ jobs:
             docker push pawelwolf/ventis2db:latest
             docker push pawelwolf/ventis2db:v3
 
+      - run:
+          name: Triggerowanie automatycznego wdrozenia w Azure App Service
+          command: |
+            curl -X POST "$AZURE_WEBHOOK_URL"
+
 workflows:
   version: 2
   weryfikacja_i_wypychanie:
