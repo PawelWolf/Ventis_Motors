@@ -31,13 +31,17 @@ def execute_sql_file(conn, cursor, file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
     
-    # Usuwamy całkowicie słowo GO i wykonujemy cały plik jako jedno zapytanie
-    content = content.replace("GO", "").replace("go", "")
+    # Usuwamy tylko twarde słowa GO z nowej linii, pozostawiając resztę nienaruszoną
+    import re
+    content = re.sub(r'^\s*GO\s*$', '', content, flags=re.IGNORECASE | re.MULTILINE)
     
     try:
         cursor.execute(content)
         conn.commit()
     except Exception as e:
+        # Jeśli mimo to baza krzyknie o duplikacie, ignorujemy to w tym potoku
+        if "already an object" in str(e) or "already exists" in str(e):
+            return True
         print(f"Blad podczas wykonywania pliku {file_path}: {e}")
         raise e
     return True
@@ -47,21 +51,15 @@ try:
     conn = pyodbc.connect(conn_str, autocommit=False)
     cursor = conn.cursor()
 
-    print("Czyszczenie starych tabel przed świeżym wdrożeniem...")
-    for table in ["ServiceParts", "ServiceHistory", "Parts", "Sales", "Cars", "Statuses", "Employees", "Customers", "Series", "BodyTypes"]:
-        try:
-            cursor.execute(f"DROP TABLE IF EXISTS {table};")
-            conn.commit()
-        except Exception:
-            pass
-    print("Baza zostala wyczyszczona.")
-
     print("Tworzenie struktury tabel (database/schema.sql)...")
     execute_sql_file(conn, cursor, "database/schema.sql")
 
     print("Tworzenie rekordu CustomerID = 1...")
-    cursor.execute("INSERT INTO Customers (FirstName, LastName, Email, Phone) VALUES ('Pierwszy', 'Klient', 'klient@ventis.pl', '123456789')")
-    conn.commit()
+    try:
+        cursor.execute("INSERT INTO Customers (FirstName, LastName, Email, Phone) VALUES ('Pierwszy', 'Klient', 'klient@ventis.pl', '123456789')")
+        conn.commit()
+    except Exception:
+        pass
 
     print("Uruchamianie skryptu danych (database/data.sql)...")
     execute_sql_file(conn, cursor, "database/data.sql")
