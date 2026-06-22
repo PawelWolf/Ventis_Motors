@@ -7,11 +7,12 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Instalacja sterowników i zależności systemowych
+# Instalacja sterowników i zależności systemowych (DODANE 'make')
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     unixodbc-dev \
+    make \
     && curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update \

@@ -1,18 +1,19 @@
-from database import db, Car, Sale, Status, BodyType
+from database import db, Car, Sale, Status, BodyType, Engine, Employee
 from models import CarNotAvailableException
 
 class CarPurchaseTemplate:
     def __init__(self, database_instance):
         self.db_instance = database_instance
 
-    def purchase(self, body_name, engine_type, colour):
-        return self.process_purchase(body_name, engine_type, colour)
+    def purchase(self, body_name, engine_type, colour, employee_id):
+        return self.process_purchase(body_name, engine_type, colour, employee_id)
 
-    def process_purchase(self, body_name, engine_type, colour):
-        # Szukamy auta o zadanych parametrach, które jest 'Available'
-        car = Car.query.join(BodyType).join(Status).filter(
+    def process_purchase(self, body_name, engine_type, colour, employee_id):
+        # Zaawansowany wielokrotny JOIN (BodyType + Status + Engine)
+        car = Car.query.join(BodyType).join(Status).join(Engine).filter(
             BodyType.TypeName == body_name,
             Status.StatusName == 'Available',
+            Engine.FuelType == engine_type,
             Car.Colour == colour
         ).first()
 
@@ -20,11 +21,16 @@ class CarPurchaseTemplate:
             raise CarNotAvailableException()
 
         try:
-            # Transakcja: Zmień status na 'Sold' (zakładamy ID=2 dla Sold)
+            # Transakcja: Zmiana statusu na 'Sold' (ID=2)
             car.StatusID = 2 
             
-            # DOdanie rekordu sprzedaży
-            new_sale = Sale(CarID=car.CarID, CustomerID=1, EmployeeID=1, FinalPrice=car.Price)
+            # Zapis transakcji w bazie danych z dynamicznym przypisaniem pracownika
+            new_sale = Sale(
+                CarID=car.CarID, 
+                CustomerID=1, 
+                EmployeeID=int(employee_id),  # <-- Dynamiczny wybór sprzedawcy!
+                FinalPrice=car.Price
+            )
             
             db.session.add(new_sale)
             db.session.commit() 

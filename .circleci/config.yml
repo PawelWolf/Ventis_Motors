@@ -1,0 +1,52 @@
+version: 2.1
+
+jobs:
+  build_and_deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      
+      - setup_remote_docker:
+          version: default
+
+      - run:
+          name: Budowanie naprawionego obrazu (DOCKER LATEST)
+          command: |
+            docker build -t pawelwolf/ventis2db:latest .
+
+      - run:
+          name: Logowanie i nadpisywanie obrazu na Docker Hubie jako LATEST i V3
+          command: |
+            echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+            docker tag pawelwolf/ventis2db:latest pawelwolf/ventis2db:v3
+            docker push pawelwolf/ventis2db:latest
+            docker push pawelwolf/ventis2db:v3
+
+      - run:
+          name: Triggerowanie automatycznego wdrozenia w Azure App Service
+          command: |
+            curl -X POST "$AZURE_WEBHOOK_URL"
+
+  db_initialize:
+    docker:
+      - image: pawelwolf/ventis2db:latest
+        auth:
+          username: $DOCKER_USERNAME
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - run:
+          name: Uruchomienie skryptu wstrzykujacego struktury i rekordy
+          command: |
+            python init_azure_db.py
+
+workflows:
+  version: 2
+  weryfikacja_i_wypychanie:
+    jobs:
+      - build_and_deploy
+      # Uruchamiamy inicjalizację bazy danych równolegle lub po deployu
+      - db_initialize:
+          requires:
+            - build_and_deploy

@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-import os
 
 db = SQLAlchemy()
 
@@ -25,6 +24,21 @@ class Engine(db.Model):
     FuelType = db.Column(db.String(20))
     Horsepower = db.Column(db.Integer)
 
+class Customer(db.Model):
+    __tablename__ = 'Customers'
+    CustomerID = db.Column(db.Integer, primary_key=True)
+    FirstName = db.Column(db.String(50))
+    LastName = db.Column(db.String(50))
+    Email = db.Column(db.String(100), unique=True)
+    Phone = db.Column(db.String(20))
+
+class Employee(db.Model):
+    __tablename__ = 'Employees'
+    EmployeeID = db.Column(db.Integer, primary_key=True)
+    FirstName = db.Column(db.String(50))
+    LastName = db.Column(db.String(50))
+    Position = db.Column(db.String(50))
+
 class Car(db.Model):
     __tablename__ = 'Cars'
     CarID = db.Column(db.Integer, primary_key=True)
@@ -36,9 +50,12 @@ class Car(db.Model):
     Price = db.Column(db.Numeric(18, 2), nullable=False)
     ProductionYear = db.Column(db.Integer)
 
-    # Relacje ułatwiające dostęp do danych
+
+    series_rel = db.relationship('Series', backref='cars')
     body_rel = db.relationship('BodyType', backref='cars')
     status_rel = db.relationship('Status', backref='cars')
+    engine_rel = db.relationship('Engine', backref='cars')
+    sales_rel = db.relationship('Sale', backref='car_rel')
 
 class Sale(db.Model):
     __tablename__ = 'Sales'
@@ -48,11 +65,4 @@ class Sale(db.Model):
     EmployeeID = db.Column(db.Integer, db.ForeignKey('Employees.EmployeeID'))
     SaleDate = db.Column(db.DateTime, server_default=db.func.now())
     FinalPrice = db.Column(db.Numeric(18, 2), nullable=False)
-
-class Customer(db.Model):
-    __tablename__ = 'Customers'
-    CustomerID = db.Column(db.Integer, primary_key=True)
-    FirstName = db.Column(db.String(50))
-    LastName = db.Column(db.String(50))
-    Email = db.Column(db.String(100), unique=True)
-    Phone = db.Column(db.String(20))
+    employee = db.relationship('Employee', backref='sales')

@@ -2,6 +2,8 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/media/logo.png" type="image/x-icon">
     <title>Ventis Motors - Dealer Panel</title>
     <link rel="stylesheet" href="/media/client_style.css">
     <style>
@@ -22,7 +24,7 @@
                     <th>Colour</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th>Salesperson</th> <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,6 +36,19 @@
                     <td>{{ car.Colour }}</td>
                     <td>{{ car.Price }} PLN</td>
                     <td>{{ car.status_rel.StatusName }}</td>
+                    
+                    <td>
+                        {% if car.status_rel.StatusName == 'Sold' %}
+                            {% if car.sales_rel %}
+                                {{ car.sales_rel[0].employee.FirstName }} {{ car.sales_rel[0].employee.LastName }}
+                            {% else %}
+                                System Archiwum
+                            {% endif %}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                    
                     <td>
                         {% if car.status_rel.StatusName == 'Sold' %}
                             <a href="{{ url_for('reset', car_id=car.CarID) }}">Make Available</a>

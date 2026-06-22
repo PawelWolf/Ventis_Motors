@@ -29,8 +29,8 @@ resource "azurerm_mssql_server" "ventis_sql_server" {
   resource_group_name          = azurerm_resource_group.ventis.name
   location                     = azurerm_resource_group.ventis.location
   version                      = "12.0"
-  administrator_login          = "wilqu"           # TWOJA NAZWA UŻYTKOWNIKA
-  administrator_login_password = "Pawel2137!"       # TWOJE HASŁO (zmień to!)
+  administrator_login          = var.db_admin_user
+  administrator_login_password = var.db_admin_password
 
   tags = {
     environment = "student"
@@ -51,21 +51,11 @@ resource "azurerm_mssql_database" "ventis_db" {
   }
 }
 
-# 3. Firewall: Pozwól usługom Azure (Twojej aplikacji) na dostęp do bazy
-resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
-  name             = "AllowAzureServices"
+resource "azurerm_mssql_firewall_rule" "allow_all_ips" {
+  name             = "AllowAllIPs"
   server_id        = azurerm_mssql_server.ventis_sql_server.id
   start_ip_address = "0.0.0.0"
-  end_ip_address   = "0.0.0.0"
-}
-
-# 4. Firewall: Pozwól Twojemu komputerowi na dostęp (do wgrania schematu)
-# SPRAWDZENIE IP 'whatismyip.com' LUB 'ipinfo.io/ip'
-resource "azurerm_mssql_firewall_rule" "allow_my_ip" {
-  name             = "AllowMyIP"
-  server_id        = azurerm_mssql_server.ventis_sql_server.id
-  start_ip_address = "83.168.79.102" # Tutaj wpisz swoje IP 
-  end_ip_address   = "83.168.79.102"  # Tutaj wpisz swoje IP (może być takie samo jak start_ip_address)
+  end_ip_address   = "255.255.255.255"
 }
 
 # Dodatek: Generator losowej liczby dla unikalnej nazwy serwera
@@ -88,4 +78,15 @@ resource "azurerm_linux_web_app" "ventis_app" {
   app_settings = {
     WEBSITES_PORT = "5000"
   }
+}
+variable "db_admin_user" {
+  type        = string
+  description = "Nazwa administratora bazy danych"
+  sensitive   = true
+}
+
+variable "db_admin_password" {
+  type        = string
+  description = "Haslo administratora bazy danych"
+  sensitive   = true
 }
