@@ -10,6 +10,24 @@
         .car-table { width: 100%; border-collapse: collapse; margin-top: 2rem; background: white; }
         .car-table th, .car-table td { border: 1px solid #ddd; padding: 12px; text-align: center; }
         .car-table th { background-color: #f4f4f4; }
+
+        /* Wersja na telefon */
+        @media (max-width: 768px) {
+            .car-table {
+                display: block; 
+                overflow-x: auto; 
+                white-space: nowrap; 
+                font-size: 0.85rem; 
+            }
+            .main_page h1 {
+                font-size: 1.5rem; 
+                margin-top: 20px;
+            }
+            .buy-back-buttons {
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -24,7 +42,8 @@
                     <th>Colour</th>
                     <th>Price</th>
                     <th>Status</th>
-                    <th>Salesperson</th> <th>Action</th>
+                    <th>Salesperson</th> 
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
